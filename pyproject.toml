@@ -6,6 +6,8 @@ authors = []
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi (>=0.117.1,<0.118.0)",
+    "uvicorn[standard] (>=0.37.0,<0.38.0)"
 ]
 
 
