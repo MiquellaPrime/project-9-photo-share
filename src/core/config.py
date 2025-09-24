@@ -1,20 +1,15 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class BaseSettingsWithConfig(BaseSettings):
-    """Base settings class with common configuration for environment variables."""
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        case_sensitive=False,
-        extra="ignore",
-    )
-
-
-class Settings(BaseSettingsWithConfig):
+class Settings(BaseSettings):
     """Main application settings container."""
 
-    pass
+    model_config = SettingsConfigDict(
+        env_file=(".env.template", ".env"),
+        case_sensitive=False,
+        env_nested_delimiter="__",
+        extra="ignore",
+    )
 
 
 settings = Settings()
