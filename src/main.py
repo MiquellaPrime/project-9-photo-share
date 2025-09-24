@@ -1,5 +1,7 @@
 from fastapi import FastAPI, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+
+from src.schemas import HealthResponse
 
 app = FastAPI()
 
@@ -9,4 +11,13 @@ async def redirect_to_docs():
     return RedirectResponse(
         url="/docs",
         status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+    )
+
+
+@app.get("/health", response_model=HealthResponse, tags=["meta"])
+async def check_health():
+    return JSONResponse(
+        content={"status": "ok"},
+        status_code=status.HTTP_200_OK,
+        headers={"Cache-Control": "no-cache"},
     )
