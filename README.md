@@ -95,7 +95,7 @@ You can run the app locally using your own PostgreSQL or by starting only the da
 
 2. Build and start:
    ```bash
-   docker compose up --build -d
+   docker compose up -d
    ```
 
    The container entrypoint applies migrations automatically.
