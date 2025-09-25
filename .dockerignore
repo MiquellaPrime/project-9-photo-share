@@ -1,0 +1,20 @@
+# IDE staff
+.idea/
+.vscode/
+
+# CI pipeline
+.ruff_cache/
+.pre-commit-config.yaml
+
+# Git
+.gitignore
+
+ # Environments
+.venv/
+.env
+.env.template
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yaml
