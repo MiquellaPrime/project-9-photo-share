@@ -22,3 +22,8 @@ async def check_health():
         status_code=status.HTTP_200_OK,
         headers={"Cache-Control": "no-cache"},
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("src.main:app", host="server", port=8000, reload=True)
