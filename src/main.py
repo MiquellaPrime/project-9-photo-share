@@ -1,9 +1,10 @@
-from fastapi import FastAPI, status
+from fastapi import status
 from fastapi.responses import JSONResponse, RedirectResponse
 
+from src.create_app import create_app
 from src.schemas import HealthResponse
 
-app = FastAPI()
+app = create_app()
 
 
 @app.get("/", include_in_schema=False)
