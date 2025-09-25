@@ -1,3 +1,5 @@
+import json
+
 from cloudinary.api import transformation
 from fastapi import FastAPI, status, Depends, UploadFile, File, Form, HTTPException
 from fastapi import status
@@ -63,9 +65,21 @@ def create_photo(
         file: UploadFile = File(...), # Uploaded photo file
         description: str = Form(None), # Optional photo description
         tags: str = Form(None), # Optional photo description
+        transformations: Optional[str] = Form(None),
         db: Session = Depends(get_db),
         user_id: int = 1 # Optional photo description
 ):
+    transform_list = []
+    if transformations:
+        try:
+            user_transforms = json.loads(transformations)
+            for t in user_transforms:
+                allowed_t = {k: v for k, v in t.itemss() if k in ALLOWED_TRANSFORMATIONS}
+                if allowed_t:
+                    transform_list.append(allowed_t)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid transformations format")
+
     # Upload the file to Cloudinary
     result = cloudinary.uploader.upload(
         file.file,
