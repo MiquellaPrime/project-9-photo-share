@@ -48,7 +48,12 @@ async def check_health():
         headers={"Cache-Control": "no-cache"},
     )
 
-ALLOWED_TRANSFORMATIONS = {} #TODO
+ALLOWED_TRANSFORMATIONS = {
+    "resize": [{"width": 800, "height": 600, "crop": "limit"}],
+    "grayscale": [{"effect": "grayscale"}],
+    "rotate": [{"angle": 90}],
+    "thumbnail": [{"width": 150, "height": 150, "crop": "thumb"}],
+}
 
 # ------------------------
 # GET all photos
@@ -150,4 +155,28 @@ def get_photo(public_id: str, db: Session = Depends(get_db)):
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     return photo
+
+
+@app.post("/photos/{photos_id}/transform")
+def transform_photo(
+        photo_id: int,
+        transformation: str = Form(...),
+        db:Session = Depends(get_db)
+):
+    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    if transformation not in ALLOWED_TRANSFORMATIONS:
+        raise HTTPException(status_code=400, detail=f"Transformation not allowed. Choose one of: {list(ALLOWED_TRANSFORMATIONS.keys())}")
+
+    result = cloudinary.uploader.explicit(
+        photo.public_id,
+        type="upload",
+        eager=ALLOWED_TRANSFORMATIONS[transformation]
+    )
+
+    transformed_url = result["eager"][0]["secure_url"]
+
+    return {"original_url": photo.url, "transformed_url": transformed_url}
 
