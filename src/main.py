@@ -22,6 +22,7 @@ from src.schemas import HealthResponse
 # load environment variables
 load_dotenv()
 
+# Configure the Cloudinary photo service.
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_SECRET"),
@@ -31,6 +32,15 @@ cloudinary.config(
 
 app = FastAPI()
 
+# Define the photo transformations we allow.
+ALLOWED_TRANSFORMATIONS = {
+    "resize": [{"width": 800, "height": 600, "crop": "limit"}],
+    "grayscale": [{"effect": "grayscale"}],
+    "rotate": [{"angle": 90}],
+    "thumbnail": [{"width": 150, "height": 150, "crop": "thumb"}],
+}
+
+## Core Routes
 
 @app.get("/", include_in_schema=False)
 async def redirect_to_docs():
@@ -48,18 +58,14 @@ async def check_health():
         headers={"Cache-Control": "no-cache"},
     )
 
-ALLOWED_TRANSFORMATIONS = {
-    "resize": [{"width": 800, "height": 600, "crop": "limit"}],
-    "grayscale": [{"effect": "grayscale"}],
-    "rotate": [{"angle": 90}],
-    "thumbnail": [{"width": 150, "height": 150, "crop": "thumb"}],
-}
+### **Photo Management (CRUD)**
 
 # ------------------------
 # GET all photos
 # ------------------------
 @app.get("/photos")
 def read_photos(db: Session = Depends(get_db)):
+    """Gets a list of all photos from the database."""
     return db.query(Photo).all()
 
 # ------------------------
@@ -72,7 +78,7 @@ def create_photo(
         tags: str = Form(None), # Optional photo description
         transformations: Optional[str] = Form(None),
         db: Session = Depends(get_db),
-        user_id: int = 1 # Optional photo description
+        user_id: int = 1 # This should be from an authenticated user
 ):
     transform_list = []
     if transformations:
@@ -113,6 +119,7 @@ def create_photo(
                 db.commit()
                 db.refresh(tag)
             photo.tags.append(tag)
+
     # Save the photo to the database
     db.add(photo)
     db.commit()
@@ -124,6 +131,7 @@ def create_photo(
 # ------------------------
 @app.put("/photos/{photo_id}")
 def update_photo(photo_id: int, description: str = Form(...), db: Session = Depends(get_db)):
+    """Updates the description of an existing photo."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
@@ -137,25 +145,28 @@ def update_photo(photo_id: int, description: str = Form(...), db: Session = Depe
 # ------------------------
 @app.delete("/photo/{photo_id}")
 def delete_photo(photo_id: int, db:Session = Depends(get_db)):
+    """Deletes a photo from the database and from Cloudinary."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
+    # First, delete from Cloudinary to avoid orphaned files.
     cloudinary.uploader.destroy(photo.public_id)
     db.delete(photo)
     db.commit()
     return {"detail": "Photo delete"}
-
 
 # ------------------------
 # GET photo by public_id
 # ------------------------
 @app.get("/photo/public/{public_id}")
 def get_photo(public_id: str, db: Session = Depends(get_db)):
+    """Gets a photo by its unique ID."""
     photo = db.query(Photo).filter(Photo.public_id == public_id).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     return photo
 
+## Transformations and QR Codes
 
 @app.post("/photos/{photos_id}/transform")
 def transform_photo(
@@ -163,20 +174,22 @@ def transform_photo(
         transformation: str = Form(...),
         db:Session = Depends(get_db)
 ):
+    """Applies a predefined transformation to a photo and returns the new URL."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
 
     if transformation not in ALLOWED_TRANSFORMATIONS:
         raise HTTPException(status_code=400, detail=f"Transformation not allowed. Choose one of: {list(ALLOWED_TRANSFORMATIONS.keys())}")
-
+    # Apply the transformation on Cloudinary.
     result = cloudinary.uploader.explicit(
         photo.public_id,
         type="upload",
         eager=ALLOWED_TRANSFORMATIONS[transformation]
     )
-
+    # Get the URL of the transformed photo.
     transformed_url = result["eager"][0]["secure_url"]
 
     return {"original_url": photo.url, "transformed_url": transformed_url}
 
+### **Generate a QR Code**

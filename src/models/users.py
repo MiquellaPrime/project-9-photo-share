@@ -6,7 +6,13 @@ from src.database import Base
 
 
 class User(Base):
+    """
+        SQLAlchemy model representing a user in the database.
+        This model contains information for authentication, roles, and
+        relationships with other models like photos and comments.
+        """
     __tablename__ = "users"
+
     # Primary key ID
     id = Column(Integer, primary_key=True, index=True)
     # Unique username for the user

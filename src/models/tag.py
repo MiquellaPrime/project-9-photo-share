@@ -6,7 +6,13 @@ from src.database import Base
 from src.models.photo import photo_tag
 
 class Tag(Base):
+    """
+        SQLAlchemy model representing a tag in the database.
+        Tags are unique and can be associated with multiple photos.
+        """
+
     __tablename__ = "tags"
+
     # Primary key ID
     id = Column(Integer, primary_key=True, index=True)
     # Unique tag name

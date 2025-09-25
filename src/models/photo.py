@@ -14,7 +14,13 @@ photo_tag = Table(
 )
 
 class Photo(Base):
+    """
+        SQLAlchemy model representing a photo in the database.
+        It contains information about the URL, Cloudinary ID, description,
+        and relationships to users, tags, and transformations.
+        """
     __tablename__ = "photos"
+
 # Primary key ID
     id = Column(Integer, primary_key=True, index=True)
 # Foreign key linking the photo to a specific user
