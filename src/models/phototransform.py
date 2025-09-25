@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from src.database import Base
-from src.models.photo import Photo
+
 
 class PhotoTransform(Base):
     """

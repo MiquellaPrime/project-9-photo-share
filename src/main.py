@@ -13,7 +13,6 @@ import cloudinary.uploader
 from dotenv import load_dotenv
 import os
 import cloudinary
-from src.routes import photos
 from typing import List, Optional
 
 from src.create_app import create_app

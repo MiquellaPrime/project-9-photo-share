@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Tabl
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from src.database import Base
-from src.models.phototransform import PhotoTransform
 
 
 transforms = relationship("PhotoTransform", back_populates="photo", cascade="all, delete")
