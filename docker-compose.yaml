@@ -1,0 +1,37 @@
+services:
+
+  app:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    restart: always
+    env_file: .env
+    environment:
+      DB__POSTGRES__HOST: db
+      DB__POSTGRES__PORT: 5432
+    ports:
+      - "${SERVER__PORT}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB__POSTGRES__DBNAME}
+      POSTGRES_USER: ${DB__POSTGRES__USER}
+      POSTGRES_PASSWORD: ${DB__POSTGRES__PASSWORD}
+    ports:
+      - "${DB__POSTGRES__PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB__POSTGRES__USER}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres_data:
