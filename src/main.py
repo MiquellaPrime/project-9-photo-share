@@ -1,3 +1,4 @@
+from cloudinary.api import transformation
 from fastapi import FastAPI, status, Depends, UploadFile, File, Form, HTTPException
 from fastapi import status
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -5,23 +6,26 @@ from sqlalchemy.orm import Session
 from src.database import get_db
 from src.models.photo import Photo
 from src.models.tag import Tag
+from src.models.users import User
 import cloudinary.uploader
+from dotenv import load_dotenv
+import os
 import cloudinary
 from src.routes import photos
 from typing import List, Optional
 
 from src.create_app import create_app
 from src.schemas import HealthResponse
-import os
 
-from dotenv import load_dotenv
+# load environment variables
+load_dotenv()
 
-from src.models.photo import Photo
-from src.models.tag import Tag
-import cloudinary.uploader
-import cloudinary
-from src.routes import photos
-from typing import List, Optional
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_SECRET"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secret=True
+)
 
 app = FastAPI()
 
@@ -42,20 +46,7 @@ async def check_health():
         headers={"Cache-Control": "no-cache"},
     )
 
-# load environment variables
-load_dotenv()
-
-cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_SECRET"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-    secret=True
-)
-
-app.include_router(photos.router)
-
 ALLOWED_TRANSFORMATIONS = {} #TODO
-
 
 # ------------------------
 # GET all photos
@@ -76,7 +67,12 @@ def create_photo(
         user_id: int = 1 # Optional photo description
 ):
     # Upload the file to Cloudinary
-    result = cloudinary.uploader.upload(file.file)
+    result = cloudinary.uploader.upload(
+        file.file,
+        transformation=[
+            {"width": 800, "height": 600, "crop": "limit"}, {"quality": "auto"}
+        ]
+    )
     url = result["secure_url"]
     public_id = result["public_id"]
     # Create a new Photo object
@@ -125,6 +121,7 @@ def delete_photo(photo_id: int, db:Session = Depends(get_db)):
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
+    cloudinary.uploader.destroy(photo.public_id)
     db.delete(photo)
     db.commit()
     return {"detail": "Photo delete"}
