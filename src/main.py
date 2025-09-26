@@ -10,7 +10,7 @@ from fastapi import FastAPI, status, Depends, UploadFile, File, Form, HTTPExcept
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from watchfiles import awatch
+
 
 from src.core.database import db_helper
 from src.models.photo import Photo
@@ -65,7 +65,7 @@ async def check_health():
 async def read_photos(db: AsyncSession = Depends(db_helper.session_getter)):
     """Gets a list of all photos from the database."""
     result = await db.execute(select(Photo))
-    return result.scalar().all()
+    return result.scalars().all()
 
 # ------------------------
 # POST a new photo
@@ -76,7 +76,7 @@ async def create_photo(
         description: str = Form(None), # Optional photo description
         tags: str = Form(None), # Optional photo description
         transformations: Optional[str] = Form(None),
-        db: AsyncSession = Depends(db_helper.session_getter()),
+        db: AsyncSession = Depends(db_helper.session_getter),
         user_id: int = 1 # This should be from an authenticated user
 ):
     transform_list = []
@@ -84,7 +84,7 @@ async def create_photo(
         try:
             user_transforms = json.loads(transformations)
             for t in user_transforms:
-                allowed_t = {k: v for k, v in t.itemss() if k in ALLOWED_TRANSFORMATIONS}
+                allowed_t = {k: v for k, v in t.items() if k in ALLOWED_TRANSFORMATIONS}
                 if allowed_t:
                     transform_list.append(allowed_t)
         except json.JSONDecodeError:
@@ -173,7 +173,7 @@ async def get_photo(public_id: str, db: AsyncSession = Depends(db_helper.session
 
 ## Transformations and QR Codes
 
-@app.post("/photos/{photos_id}/transform")
+@app.post("/photos/{photo_id}/transform")
 async def transform_photo(
         photo_id: int,
         transformation: str = Form(...),

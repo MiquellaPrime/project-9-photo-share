@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from src.core.database import Base
 
@@ -14,24 +14,25 @@ class User(Base):
     __tablename__ = "users"
 
     # Primary key ID
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     # Unique username for the user
-    username = Column(String, unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     # Unique email for authentication and communication
-    email = Column(String, unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     # Hashed password for secure storage
-    hashed_password = Column(String, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     # User role (e.g., "user", "admin")
-    role: str = Column(String, default="user")
+    role: Mapped[str] = mapped_column(String, default="user")
     # Timestamp for account creation
-    is_active = Column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    created_at: DateTime = Column(DateTime, default=datetime.utcnow)
-    updated_at: DateTime = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     # One-to-many relationship: a user can have multiple photos
-    photos = relationship("Photo", back_populates="user")
+    photos: Mapped[list["Photo"]] = relationship("Photo", back_populates="user")
     # One-to-many relationship: a user can write multiple comments
-    comments = relationship("Comment", back_populates="user")
+    comments: Mapped[list["Comment"]]= relationship("Comment", back_populates="user")
+
     # String representation for debugging and logging
     def __repr__(self):
         return f"<User(username={self.username}, email={self.email}, role={self.role})>"

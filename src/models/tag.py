@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
 
 from src.core.database import Base
@@ -15,11 +15,11 @@ class Tag(Base):
     __tablename__ = "tags"
 
     # Primary key ID
-    id: int = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     # Unique tag name
-    name: str = Column(String, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)
     # Many-to-many relationship: a tag can be associated with multiple photos
-    photos: List[Photo] = relationship("Photo", secondary=photo_tag, back_populates="tags")
+    photos: Mapped[List["Photo"]] = relationship("Photo", secondary=photo_tag, back_populates="tags")
     # String representation for debugging and logging
     def __repr__(self):
         return f"<Tag(name={self.name})>"
