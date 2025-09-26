@@ -1,7 +1,6 @@
 from sqlalchemy import Integer, String, ForeignKey, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from typing import Optional
 from src.core.database import Base
 
 
@@ -21,7 +20,7 @@ class PhotoTransform(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    photo: Mapped["Photo"]= relationship("Photo", back_populates="transforms")
+    photo: Mapped["Photo"]= relationship("Photo", back_populates="transformations")
 
     def __repr__(self) -> str:
         return f"<PhotoTransformation(type={self.transformation_type}, value={self.transformation_value})>"

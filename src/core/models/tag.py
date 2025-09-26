@@ -1,10 +1,9 @@
-from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
 
 from src.core.database import Base
-from src.models.photo import photo_tag
-from src.models.photo import Photo
+from src.core.models.photo import photo_tag
+from src.core.models.photo import Photo
 
 class Tag(Base):
     """

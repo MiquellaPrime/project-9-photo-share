@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Table
+from sqlalchemy import Column, String, Text, ForeignKey, DateTime, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from src.core.database import Base
@@ -35,8 +35,8 @@ class Photo(Base):
 # Relationships
     user: Mapped["User"] = relationship("User", back_populates="photos")
     tags: Mapped[List["Tag"]] = relationship("Tag", secondary=photo_tag, back_populates="photos")
-    transformations: Mapped[List["PhotoTransformation"]] = relationship(
-        "PhotoTransformation", back_populates="photo", cascade="all, delete-orphan"
+    transformations: Mapped[List["PhotoTransform"]] = relationship(
+        "PhotoTransform", back_populates="photo", cascade="all, delete-orphan"
     )
 
 # Method to add tags to a photo (with a max of 5 tags)
@@ -45,8 +45,8 @@ class Photo(Base):
             if tag not in self.tags:
                 self.tags.append(tag)
 
-    def add_transformation(self, transformation: "PhotoTransformation") -> None:
-        self.add_transformation.append(transformation)
+    def add_transformation(self, transformation: "PhotoTransform") -> None:
+        self.transformations.append(transformation)
 
     def __repr__(self) -> str:
         return f"<Photo(id={self.id}, url={self.url})>"

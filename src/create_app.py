@@ -4,11 +4,14 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 
 from src.core import db_helper
+from src.core.cloudinary_config import init_cloudinary
+from src.core.routes import photos as photo_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # startup
+    init_cloudinary()
     yield
     # shutdown
     await db_helper.dispose()
@@ -16,4 +19,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
+
+    app.include_router(photo_router.router, prefix="/api/v1/photos", tags=["photos"])
+
     return app
+
