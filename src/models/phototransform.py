@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from src.database import Base
+from src.core.database import Base
 
 
 class PhotoTransform(Base):
@@ -17,6 +17,7 @@ class PhotoTransform(Base):
     photo_id = Column(Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False)
     transformation_type = Column(String, nullable=False)
     transformation_value = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at: DateTime = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at: DateTime = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     photo = relationship("Photo", back_populates="transforms")

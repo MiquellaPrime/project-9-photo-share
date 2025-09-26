@@ -1,10 +1,9 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from src.database import Base
+from src.core.database import Base
 
 
-transforms = relationship("PhotoTransform", back_populates="photo", cascade="all, delete")
 # Association table for many-to-many relationship between Photo and Tag
 photo_tag = Table(
     "photo_tag", Base.metadata,
@@ -31,7 +30,7 @@ class Photo(Base):
     description = Column(Text, nullable= True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+# Relationships
     user = relationship("User", back_populates="photos")
     tags = relationship("Tag", secondary=photo_tag, back_populates="photos")
 
@@ -39,3 +38,6 @@ class Photo(Base):
     def add_tags(self, tags_list):
         for tag in tags_list[:5]:
             self.tags.append(tag)
+
+    def add_transformation(self, transformation: "PhotoTransformation") -> None:
+        self.add_transformation.append(transformation)

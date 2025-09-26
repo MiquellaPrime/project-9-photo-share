@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from src.database import Base
+from src.core.database import Base
 
 
 
@@ -22,12 +22,12 @@ class User(Base):
     # Hashed password for secure storage
     hashed_password = Column(String, nullable=False)
     # User role (e.g., "user", "admin")
-    role = Column(String, default="user")
+    role: str = Column(String, default="user")
     # Timestamp for account creation
     is_active = Column(Boolean, default=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: DateTime = Column(DateTime, default=datetime.utcnow)
+    updated_at: DateTime = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     # One-to-many relationship: a user can have multiple photos
     photos = relationship("Photo", back_populates="user")
     # One-to-many relationship: a user can write multiple comments

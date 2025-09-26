@@ -1,21 +1,20 @@
 import json
-
-from cloudinary.api import transformation
-from fastapi import FastAPI, status, Depends, UploadFile, File, Form, HTTPException
-from fastapi import status
-from fastapi.responses import JSONResponse, RedirectResponse
-from sqlalchemy.orm import Session
-from src.database import get_db
-from src.models.photo import Photo
-from src.models.tag import Tag
-from src.models.users import User
-import cloudinary.uploader
-from dotenv import load_dotenv
 import os
 import cloudinary
+import cloudinary.uploader
+from dotenv import load_dotenv
 from typing import List, Optional
 
-from src.create_app import create_app
+
+from fastapi import FastAPI, status, Depends, UploadFile, File, Form, HTTPException
+from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from watchfiles import awatch
+
+from src.core.database import db_helper
+from src.models.photo import Photo
+from src.models.tag import Tag
 from src.schemas import HealthResponse
 
 # load environment variables
@@ -63,20 +62,21 @@ async def check_health():
 # GET all photos
 # ------------------------
 @app.get("/photos")
-def read_photos(db: Session = Depends(get_db)):
+async def read_photos(db: AsyncSession = Depends(db_helper.session_getter)):
     """Gets a list of all photos from the database."""
-    return db.query(Photo).all()
+    result = await db.execute(select(Photo))
+    return result.scalar().all()
 
 # ------------------------
 # POST a new photo
 # ------------------------
 @app.post("/photos")
-def create_photo(
+async def create_photo(
         file: UploadFile = File(...), # Uploaded photo file
         description: str = Form(None), # Optional photo description
         tags: str = Form(None), # Optional photo description
         transformations: Optional[str] = Form(None),
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(db_helper.session_getter()),
         user_id: int = 1 # This should be from an authenticated user
 ):
     transform_list = []
@@ -110,57 +110,63 @@ def create_photo(
     if tags:
         tag_names = [t.strip() for t in tags.split(",")][:5]
         for name in tag_names:
-            tag = db.query(Tag).filter(Tag.name == name).first()
+            q = await db.execute(select(Tag).where(Tag.name == name))
+            tag = q.scalar_one_or_none()
             if not tag:
                 # Create the tag if it does not exist
                 tag = Tag(name=name)
                 db.add(tag)
-                db.commit()
-                db.refresh(tag)
+                await db.commit()
+                await db.refresh(tag)
             photo.tags.append(tag)
 
     # Save the photo to the database
     db.add(photo)
-    db.commit()
-    db.refresh(photo)
+    await db.commit()
+    await db.refresh(photo)
     return photo
 
 # ------------------------
 # PUT update photo description
 # ------------------------
 @app.put("/photos/{photo_id}")
-def update_photo(photo_id: int, description: str = Form(...), db: Session = Depends(get_db)):
+async def update_photo(photo_id: int, description: str = Form(...), db: AsyncSession = Depends(db_helper.session_getter)):
     """Updates the description of an existing photo."""
-    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    result = await db.execute(select(Photo).where(Photo.id == photo_id))
+    photo = result.scalar_one_or_none()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     photo.description = description
-    db.commit()
-    db.refresh(photo)
+    await db.commit()
+    await db.refresh(photo)
     return photo
 
 # ------------------------
 # DELETE photo by ID
 # ------------------------
 @app.delete("/photo/{photo_id}")
-def delete_photo(photo_id: int, db:Session = Depends(get_db)):
+async def delete_photo(photo_id: int, db: AsyncSession = Depends(db_helper.session_getter)):
     """Deletes a photo from the database and from Cloudinary."""
-    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    result = await db.execute(select(Photo).where(Photo.id == photo_id))
+    photo = result.scalar_one_or_none()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
-    # First, delete from Cloudinary to avoid orphaned files.
+
+    # Delete from Cloudinary
     cloudinary.uploader.destroy(photo.public_id)
-    db.delete(photo)
-    db.commit()
+
+    await db.delete(photo)
+    await db.commit()
     return {"detail": "Photo delete"}
 
 # ------------------------
 # GET photo by public_id
 # ------------------------
 @app.get("/photo/public/{public_id}")
-def get_photo(public_id: str, db: Session = Depends(get_db)):
+async def get_photo(public_id: str, db: AsyncSession = Depends(db_helper.session_getter)):
     """Gets a photo by its unique ID."""
-    photo = db.query(Photo).filter(Photo.public_id == public_id).first()
+    result = await db.execute(select(Photo).where(Photo.public_id == public_id))
+    photo = result.scalar_one_or_none()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     return photo
@@ -168,13 +174,14 @@ def get_photo(public_id: str, db: Session = Depends(get_db)):
 ## Transformations and QR Codes
 
 @app.post("/photos/{photos_id}/transform")
-def transform_photo(
+async def transform_photo(
         photo_id: int,
         transformation: str = Form(...),
-        db:Session = Depends(get_db)
+        db:AsyncSession = Depends(db_helper.session_getter)
 ):
     """Applies a predefined transformation to a photo and returns the new URL."""
-    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    result = await db.execute(select(Photo).where(Photo.id == photo_id))
+    photo = result.scalar_one_or_none()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
 
