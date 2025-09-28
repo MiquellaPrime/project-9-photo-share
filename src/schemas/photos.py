@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class BaseModelWithConfig(BaseModel):
@@ -21,3 +21,7 @@ class PhotoCreateDto(PhotoBaseDto):
 class PhotoDto(PhotoBaseDto):
     created_at: datetime
     updated_at: datetime
+
+
+class PhotoUpdateDto(BaseModel):
+    description: str | None = Field(default=None, min_length=1, max_length=255)
