@@ -40,6 +40,17 @@ class DatabaseConfig(BaseModel):
     }
 
 
+class CloudinaryConfig(BaseModel):
+    """Cloudinary connection configuration."""
+
+    api_key: str
+    api_secret: str
+    cloud_name: str
+    secure: bool = True
+
+    asset_folder: str = "photo-share"
+
+
 class Settings(BaseSettings):
     """Main application settings container."""
 
@@ -50,6 +61,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
     db: DatabaseConfig
+    cloudinary: CloudinaryConfig
 
 
 settings = Settings()
