@@ -23,4 +23,3 @@ def create_app() -> FastAPI:
     app.include_router(photo_router.router, prefix="/api/v1/photos", tags=["photos"])
 
     return app
-

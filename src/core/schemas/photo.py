@@ -1,9 +1,12 @@
-from pydantic import BaseModel
 from typing import List, Optional
+
+from pydantic import BaseModel
+
 
 class TagSchema(BaseModel):
     id: int
     name: str
+
     class Config:
         orm_mode = True
 
@@ -17,4 +20,3 @@ class PhotoSchema(BaseModel):
 
     class Config:
         orm_mode = True
-

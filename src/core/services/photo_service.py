@@ -1,11 +1,11 @@
 import json
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+
 import cloudinary.uploader
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.models.photo import Photo
 from src.core.models.tag import Tag
-
 
 # Define the photo transformations we allow.
 ALLOWED_TRANSFORMATIONS = {
@@ -16,7 +16,9 @@ ALLOWED_TRANSFORMATIONS = {
 }
 
 
-async def upload_photo(file, description, tags, transformations, user_id, db: AsyncSession):
+async def upload_photo(
+    file, description, tags, transformations, user_id, db: AsyncSession
+):
     transform_list = []
     if transformations:
         try:
@@ -32,8 +34,9 @@ async def upload_photo(file, description, tags, transformations, user_id, db: As
     result = cloudinary.uploader.upload(
         file.file,
         transformation=[
-            {"width": 800, "height": 600, "crop": "limit"}, {"quality": "auto"}
-        ]
+            {"width": 800, "height": 600, "crop": "limit"},
+            {"quality": "auto"},
+        ],
     )
 
     # Create a new Photo object
@@ -41,7 +44,7 @@ async def upload_photo(file, description, tags, transformations, user_id, db: As
         user_id=user_id,
         url=result["secure_url"],
         public_id=result["public_id"],
-        description=description
+        description=description,
     )
     # Handle tags (max 5)
     tags_objs = []
@@ -64,10 +67,11 @@ async def upload_photo(file, description, tags, transformations, user_id, db: As
     await db.refresh(photo)
 
 
-
 async def transform_photo(photo: Photo, transformation: str, db: AsyncSession) -> str:
     if transformation not in ALLOWED_TRANSFORMATIONS:
-        raise ValueError(f"Transformation not allowed. Choose one of: {list(ALLOWED_TRANSFORMATIONS.keys())}")
+        raise ValueError(
+            f"Transformation not allowed. Choose one of: {list(ALLOWED_TRANSFORMATIONS.keys())}"
+        )
     try:
         result = cloudinary.uploader.explicit(
             photo.public_id,
@@ -77,9 +81,9 @@ async def transform_photo(photo: Photo, transformation: str, db: AsyncSession) -
     except Exception as e:
         raise ValueError(f"Cloudinary transformation failed: {str(e)}")
 
-
     transformed_url = result["eager"][0]["secure_url"]
     return transformed_url
+
 
 async def delete_photo(photo: Photo, db: AsyncSession):
     try:
@@ -89,5 +93,3 @@ async def delete_photo(photo: Photo, db: AsyncSession):
 
     await db.delete(photo)
     await db.commit()
-
-

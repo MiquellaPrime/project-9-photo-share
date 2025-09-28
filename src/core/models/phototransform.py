@@ -1,27 +1,37 @@
-from sqlalchemy import Integer, String, ForeignKey, DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.core.database import Base
+
+from .photo import Photo
 
 
 class PhotoTransform(Base):
     """
-        SQLAlchemy model representing a transformation applied to a photo.
-        This model stores a unique link to a transformed version of the original photo,
-        along with details about the transformation (e.g., resize, filter).
-        """
+    SQLAlchemy model representing a transformation applied to a photo.
+    This model stores a unique link to a transformed version of the original photo,
+    along with details about the transformation (e.g., resize, filter).
+    """
+
     __tablename__ = "photo_transforms"
 
     # Primary key ID for the transformation record.
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    photo_id: Mapped[int] = mapped_column(Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False)
+    photo_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
+    )
     transformation_type: Mapped[str] = mapped_column(String, nullable=False)
     transformation_value: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
-    photo: Mapped["Photo"]= relationship("Photo", back_populates="transformations")
+    photo: Mapped["Photo"] = relationship("Photo", back_populates="transformations")
 
     def __repr__(self) -> str:
         return f"<PhotoTransformation(type={self.transformation_type}, value={self.transformation_value})>"
-

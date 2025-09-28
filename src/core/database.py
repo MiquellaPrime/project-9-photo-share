@@ -1,13 +1,13 @@
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base
 
 from .config import settings
 
-from sqlalchemy.orm import declarative_base
-
 # Declarative basis for models
 Base = declarative_base()
+
 
 class DatabaseHelper:
     """Helper class for managing database connections and sessions."""
