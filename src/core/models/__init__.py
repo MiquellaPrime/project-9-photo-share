@@ -1,3 +1,7 @@
-__all__ = ("Base",)
+__all__ = (
+    "Base",
+    "UserOrm",
+)
 
 from .base import Base
+from .users import UserOrm
