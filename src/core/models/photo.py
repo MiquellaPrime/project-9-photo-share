@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import List
 
@@ -5,10 +7,9 @@ from sqlalchemy import Column, DateTime, ForeignKey, String, Table, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
-
-from .phototransform import PhotoTransform
-from .tag import Tag
-from .users import User
+from src.core.models.phototransform import PhotoTransformORM
+from src.core.models.tag import TagORM
+from src.core.models.users import UserORM
 
 # Association table for many-to-many relationship between Photo and Tag
 photo_tag = Table(
@@ -19,7 +20,7 @@ photo_tag = Table(
 )
 
 
-class Photo(Base):
+class PhotoORM(Base):
     """
     SQLAlchemy model representing a photo in the database.
     It contains information about the URL, Cloudinary ID, description,
@@ -29,7 +30,7 @@ class Photo(Base):
     __tablename__ = "photos"
 
     # Primary key ID
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(String, index=True)
     # Foreign key linking the photo to a specific user
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
@@ -44,22 +45,19 @@ class Photo(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="photos")
-    tags: Mapped[List["Tag"]] = relationship(
-        "Tag", secondary=photo_tag, back_populates="photos"
+    user: Mapped["UserORM"] = relationship("UserORM", back_populates="photos")
+    tags: Mapped[List["TagORM"]] = relationship(
+        "TagORM", secondary=photo_tag, back_populates="photos"
     )
-    transformations: Mapped[List["PhotoTransform"]] = relationship(
-        "PhotoTransform", back_populates="photo", cascade="all, delete-orphan"
+    transformations: Mapped[List["PhotoTransformORM"]] = relationship(
+        "PhotoTransformORM", back_populates="photo", cascade="all, delete-orphan"
     )
 
     # Method to add tags to a photo (with a max of 5 tags)
-    def add_tags(self, tags_list: List["Tag"]) -> None:
+    def add_tags(self, tags_list: List["TagORM"]) -> None:
         for tag in tags_list[:5]:
             if tag not in self.tags:
                 self.tags.append(tag)
 
-    def add_transformation(self, transformation: "PhotoTransform") -> None:
+    def add_transformation(self, transformation: "PhotoTransformORM") -> None:
         self.transformations.append(transformation)
-
-    def __repr__(self) -> str:
-        return f"<Photo(id={self.id}, url={self.url})>"

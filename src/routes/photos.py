@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import db_helper
 from src.core.models.photo import Photo
-from src.core.schemas.photo import PhotoSchema
-from src.core.services.photo_service import upload_photo
+from src.schemas.photo import PhotoSchema
+from src.services.photo_service import upload_photo
 
 router = APIRouter()
 

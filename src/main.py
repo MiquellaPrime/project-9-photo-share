@@ -1,14 +1,11 @@
-import uvicorn
 from fastapi import status
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from src.core.routes import photos as photo_router
-from src.core.schemas import HealthResponse
 from src.create_app import create_app
+from src.routes import photos as photo_router
+from src.schemas import HealthResponse
 
 app = create_app()
-
-## Core Routes
 
 
 @app.get("/", include_in_schema=False)
@@ -29,6 +26,3 @@ async def check_health():
 
 
 app.include_router(photo_router.router, prefix="/api/v1/photos", tags=["photos"])
-
-if __name__ == "__main__":
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)

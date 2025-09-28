@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
+from src.core.models.comment import Comment
+from src.core.models.photo import PhotoORM
 
-from .comment import Comment
-from .photo import Photo
 
-
-class User(Base):
+class UserORM(Base):
     """
     SQLAlchemy model representing a user in the database.
     This model contains information for authentication, roles, and
@@ -36,10 +37,6 @@ class User(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     # One-to-many relationship: a user can have multiple photos
-    photos: Mapped[list["Photo"]] = relationship("Photo", back_populates="user")
+    photos: Mapped[list["PhotoORM"]] = relationship("PhotoORM", back_populates="user")
     # One-to-many relationship: a user can write multiple comments
     comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="user")
-
-    # String representation for debugging and logging
-    def __repr__(self):
-        return f"<User(username={self.username}, email={self.email}, role={self.role})>"

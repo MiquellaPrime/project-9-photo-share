@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from src.core import db_helper
 from src.core.cloudinary_config import init_cloudinary
-from src.core.routes import photos as photo_router
+from src.routes import photos as photo_router
 
 
 @asynccontextmanager

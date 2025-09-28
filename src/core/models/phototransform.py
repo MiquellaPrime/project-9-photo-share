@@ -1,14 +1,15 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
+from src.core.models.photo import PhotoORM
 
-from .photo import Photo
 
-
-class PhotoTransform(Base):
+class PhotoTransformORM(Base):
     """
     SQLAlchemy model representing a transformation applied to a photo.
     This model stores a unique link to a transformed version of the original photo,
@@ -31,7 +32,6 @@ class PhotoTransform(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    photo: Mapped["Photo"] = relationship("Photo", back_populates="transformations")
-
-    def __repr__(self) -> str:
-        return f"<PhotoTransformation(type={self.transformation_type}, value={self.transformation_value})>"
+    photo: Mapped["PhotoORM"] = relationship(
+        "PhotoORM", back_populates="transformations"
+    )
