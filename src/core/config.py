@@ -40,8 +40,19 @@ class DatabaseConfig(BaseModel):
     }
 
 
+class CloudinaryConfig(BaseModel):
+    cloud_name: str
+    api_key: str
+    api_secret: str
+    secure: bool = True
+    asset_folder: str = "photo-share"
+
+
 class Settings(BaseSettings):
     """Main application settings container."""
+
+    db: DatabaseConfig
+    cloudinary: CloudinaryConfig
 
     model_config = SettingsConfigDict(
         env_file=(".env.template", ".env"),
@@ -49,7 +60,6 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
         extra="ignore",
     )
-    db: DatabaseConfig
 
 
 settings = Settings()
