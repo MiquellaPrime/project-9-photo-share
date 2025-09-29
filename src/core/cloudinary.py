@@ -1,10 +1,9 @@
 from asyncio import to_thread
 
+import cloudinary
 from cloudinary.uploader import destroy, upload
 
-import cloudinary
-
-from .config import CloudinaryConfig, settings
+from src.core.config import CloudinaryConfig, settings
 
 
 class CloudinaryClient:
@@ -24,15 +23,6 @@ class CloudinaryClient:
 
     async def destroy_image(self, public_id: str) -> dict:
         result = await to_thread(destroy, public_id)
-        return result
-
-    async def explicit_image(self, public_id: str, transformations: list[dict]) -> dict:
-        result = await to_thread(
-            cloudinary.uploader.explicit,
-            public_id,
-            type="upload",
-            eager=transformations,
-        )
         return result
 
 
