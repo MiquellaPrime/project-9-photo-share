@@ -49,3 +49,17 @@ async def login(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
+
+@router.post(
+    "/refresh",
+    response_model=TokenInfo,
+    response_model_exclude_none=True,
+)
+async def refresh_access_token(
+    user: Annotated[UserOrm, Depends(auth_service.user_from_refresh)],
+    token_service: token_service_dependency,
+):
+    access_token = token_service.create_access_token(user=user)
+
+    return TokenInfo(access_token=access_token)
