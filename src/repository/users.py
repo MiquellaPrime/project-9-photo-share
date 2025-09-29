@@ -20,6 +20,17 @@ async def create_user(
     return user
 
 
+async def get_user_by_id(
+    session: AsyncSession,
+    user_id: int,
+) -> UserOrm:
+    """Get a user by id."""
+    stmt = select(UserOrm).filter_by(id=user_id)
+
+    result = await session.execute(stmt)
+    return result.scalars().first()
+
+
 async def get_user_by_email(
     session: AsyncSession,
     email: str,
