@@ -1,3 +1,7 @@
-__all__ = ("PasswordHashService",)
+__all__ = (
+    "PasswordHashService",
+    "TokenService",
+)
 
 from .security import PasswordHashService
+from .token import TokenService
