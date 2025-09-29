@@ -27,7 +27,7 @@ package-mode = false
 pre-commit = "^4.3.0"
 black = "^25.9.0"
 ruff = "^0.13.1"
-pytest-asyncio = "^1.2.0"
+
 
 [tool.black]
 target-version = ["py311"]
