@@ -1,29 +1,24 @@
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from .enums import UserRole
 
 
-class UserBase(BaseModel):
-    email: str
-    role: UserRole
-    is_active: bool = True
-    is_verified: bool = False
+class UserCreateDto(BaseModel):
+
+    email: EmailStr
+    password: str = Field(min_length=6)
 
 
-class UserCreateDto(UserBase):
-    password: str
+class UserDto(BaseModel):
 
-
-class UserUpdateDto(UserBase):
-    hashed_password: Optional[str] = None
-
-
-class UserInDB(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    email: EmailStr
+    role: UserRole
+    is_active: bool
+    is_verified: bool
     created_at: datetime
     updated_at: datetime
