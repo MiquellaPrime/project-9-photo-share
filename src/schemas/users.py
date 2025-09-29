@@ -10,12 +10,11 @@ class BaseModelWithConfig(BaseModel):
 
 
 class UserBaseDto(BaseModelWithConfig):
-    pass
+    email: EmailStr
 
 
 class UserDto(UserBaseDto):
     id: int
-    email: EmailStr
     role: UserRole
     is_active: bool
     is_verified: bool
@@ -23,6 +22,5 @@ class UserDto(UserBaseDto):
     updated_at: datetime
 
 
-class UserCreateDto(BaseModel):
-    email: EmailStr
+class UserCreateDto(UserBaseDto):
     password: str = Field(min_length=6)
