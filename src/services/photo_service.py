@@ -1,11 +1,13 @@
 import json
+import os
+import tempfile
 
-import cloudinary.uploader
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models.photo import Photo
-from src.core.models.tag import Tag
+from src.core import cloudinary_cli
+from src.core.models.photo import PhotoORM
+from src.core.models.tag import TagORM
 
 # Define the photo transformations we allow.
 ALLOWED_TRANSFORMATIONS = {
@@ -30,17 +32,15 @@ async def upload_photo(
         except json.JSONDecodeError:
             raise ValueError("Invalid transformations format")
 
-    # Upload the file to Cloudinary
-    result = cloudinary.uploader.upload(
-        file.file,
-        transformation=[
-            {"width": 800, "height": 600, "crop": "limit"},
-            {"quality": "auto"},
-        ],
-    )
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(await file.read())
+        temp_path = tmp.name
+
+    result = await cloudinary_cli.upload_image(temp_path)
+    os.remove(temp_path)
 
     # Create a new Photo object
-    photo = Photo(
+    photo = PhotoORM(
         user_id=user_id,
         url=result["secure_url"],
         public_id=result["public_id"],
@@ -51,10 +51,10 @@ async def upload_photo(
     if tags:
         tag_names = [t.strip() for t in tags.split(",")][:5]
         for name in tag_names:
-            q = await db.execute(select(Tag).where(Tag.name == name))
+            q = await db.execute(select(TagORM).where(TagORM.name == name))
             tag = q.scalar_one_or_none()
             if not tag:
-                tag = Tag(name=name)
+                tag = TagORM(name=name)
                 db.add(tag)
                 await db.flush()
 
@@ -62,21 +62,23 @@ async def upload_photo(
 
     # Save the photo to the database
     photo.tags.extend(tags_objs)
+
     db.add(photo)
     await db.commit()
     await db.refresh(photo)
 
 
-async def transform_photo(photo: Photo, transformation: str, db: AsyncSession) -> str:
+async def transform_photo(
+    photo: PhotoORM, transformation: str, db: AsyncSession
+) -> str:
     if transformation not in ALLOWED_TRANSFORMATIONS:
         raise ValueError(
             f"Transformation not allowed. Choose one of: {list(ALLOWED_TRANSFORMATIONS.keys())}"
         )
     try:
-        result = cloudinary.uploader.explicit(
+        result = await cloudinary_cli.explicit_image(
             photo.public_id,
-            type="upload",
-            eager=ALLOWED_TRANSFORMATIONS[transformation],
+            ALLOWED_TRANSFORMATIONS[transformation],
         )
     except Exception as e:
         raise ValueError(f"Cloudinary transformation failed: {str(e)}")
@@ -85,9 +87,9 @@ async def transform_photo(photo: Photo, transformation: str, db: AsyncSession) -
     return transformed_url
 
 
-async def delete_photo(photo: Photo, db: AsyncSession):
+async def delete_photo(photo: PhotoORM, db: AsyncSession):
     try:
-        cloudinary.uploader.destroy(photo.public_id)
+        await cloudinary_cli.destroy_image(photo.public_id)
     except Exception as e:
         raise ValueError(f"Cloudinary deletion failed: {str(e)}")
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Table, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
@@ -30,7 +30,7 @@ class PhotoORM(Base):
     __tablename__ = "photos"
 
     # Primary key ID
-    id: Mapped[int] = mapped_column(String, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     # Foreign key linking the photo to a specific user
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False

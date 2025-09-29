@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -40,8 +40,19 @@ class DatabaseConfig(BaseModel):
     }
 
 
+class CloudinaryConfig(BaseModel):
+    cloud_name: str = Field(..., env="CLOUDINARY_CLOUD_NAME")
+    api_key: str = Field(..., env="CLOUDINARY_API_KEY")
+    api_secret: str = Field(..., env="CLOUDINARY_API_SECRET")
+    secure: bool = True
+    asset_folder: str = "photo-share"
+
+
 class Settings(BaseSettings):
     """Main application settings container."""
+
+    db: DatabaseConfig
+    cloudinary: CloudinaryConfig
 
     model_config = SettingsConfigDict(
         env_file=(".env.template", ".env"),
@@ -49,7 +60,6 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
         extra="ignore",
     )
-    db: DatabaseConfig
 
 
 settings = Settings()

@@ -21,7 +21,7 @@ class PhotoTransformORM(Base):
     # Primary key ID for the transformation record.
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     photo_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
     )
     transformation_type: Mapped[str] = mapped_column(String, nullable=False)
     transformation_value: Mapped[str] = mapped_column(String, nullable=False)

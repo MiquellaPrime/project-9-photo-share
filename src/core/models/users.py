@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
-from src.core.models.comment import Comment
 from src.core.models.photo import PhotoORM
 
 
@@ -20,8 +19,7 @@ class UserORM(Base):
     __tablename__ = "users"
 
     # Primary key ID
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    # Unique username for the user
+    id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     # Unique email for authentication and communication
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
@@ -39,4 +37,3 @@ class UserORM(Base):
     # One-to-many relationship: a user can have multiple photos
     photos: Mapped[list["PhotoORM"]] = relationship("PhotoORM", back_populates="user")
     # One-to-many relationship: a user can write multiple comments
-    comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="user")
