@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-from src.schemas import UserRole
+from src.schemas import UserRoles
 
 
 class BaseModelWithConfig(BaseModel):
@@ -15,7 +15,7 @@ class UserBaseDto(BaseModelWithConfig):
 
 class UserDto(UserBaseDto):
     id: int
-    role: UserRole
+    role: UserRoles
     is_active: bool
     is_verified: bool
     created_at: datetime
