@@ -5,5 +5,5 @@ __all__ = (
 )
 
 from .base import Base
-from .photo import PhotoOrm
+from .photos import PhotoOrm
 from .users import UserOrm
