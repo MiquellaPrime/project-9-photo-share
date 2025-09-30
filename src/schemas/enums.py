@@ -1,7 +1,7 @@
-import enum
+from enum import Enum
 
 
-class UserRole(str, enum.Enum):
-    user = "user"
-    admin = "admin"
-    moderator = "moderator"
+class UserRoles(str, Enum):
+    USER = "user"
+    MODERATOR = "moderator"
+    ADMIN = "admin"
