@@ -2,9 +2,11 @@ from fastapi import status
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from src.create_app import create_app
+from src.routes import router as main_router
 from src.schemas import HealthResponse
 
 app = create_app()
+app.include_router(main_router)
 
 
 @app.get("/", include_in_schema=False)
