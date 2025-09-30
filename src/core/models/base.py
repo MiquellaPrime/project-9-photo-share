@@ -6,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column
 
 from src.core.config import settings
 
-UTC_NOW_SQL = text("timezone('utc', now())")
+UTC_NOW_SQL = text("TIMEZONE('utc', now())")
 
 str_255 = Annotated[str, 255]
 
@@ -14,6 +14,8 @@ timestamp_tz = Annotated[
     datetime,
     mapped_column(server_default=UTC_NOW_SQL),
 ]
+bool_t = Annotated[bool, mapped_column(server_default=text("TRUE"))]
+bool_f = Annotated[bool, mapped_column(server_default=text("FALSE"))]
 
 
 class Base(DeclarativeBase):
