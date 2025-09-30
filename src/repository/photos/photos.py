@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 from uuid import UUID
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.models import PhotoOrm
-from src.schemas.photo import PhotoCreateDTO
+from src.schemas.photos import PhotoCreateDTO
 
 
 async def create_photo(session: AsyncSession, body: PhotoCreateDTO) -> PhotoOrm:
