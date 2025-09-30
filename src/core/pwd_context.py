@@ -5,7 +5,7 @@ class PasswordContext:
     """Class for hashing and validating passwords"""
 
     def __init__(self):
-        self._ctx = PasswordHash()
+        self._ctx = PasswordHash().recommended()
 
     def hash_password(self, password: str) -> str:
         return self._ctx.hash(password)
