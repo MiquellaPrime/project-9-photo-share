@@ -30,13 +30,13 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("timezone('utc', now())"),
+            server_default=sa.text("TIMEZONE('utc', now())"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
             sa.TIMESTAMP(timezone=True),
-            server_default=sa.text("timezone('utc', now())"),
+            server_default=sa.text("TIMEZONE('utc', now())"),
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("uuid", name=op.f("pk_photos")),
