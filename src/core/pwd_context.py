@@ -4,8 +4,8 @@ from pwdlib import PasswordHash
 class PasswordContext:
     """Class for hashing and validating passwords"""
 
-    def __init__(self, scheme: str = "argon2"):
-        self._ctx = PasswordHash(scheme)
+    def __init__(self):
+        self._ctx = PasswordHash()
 
     def hash_password(self, password: str) -> str:
         return self._ctx.hash(password)
