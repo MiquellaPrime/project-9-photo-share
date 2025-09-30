@@ -611,6 +611,10 @@ files = [
     {file = "packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"},
 ]
 
+[package.extras]
+build-docs = ["cloud-sptheme (>=1.10.1)", "sphinx (>=1.6)", "sphinxcontrib-fulltoc (>=1.2.0)"]
+totp = ["cryptography"]
+
 [[package]]
 name = "pathspec"
 version = "0.12.1"
@@ -1441,4 +1445,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "1b0fdd837c7cbf5a61ebff3b31a2eb7d99a1ffc8ff4ab040736af1121492e8fb"
+content-hash = "b29fa355d849e023bebbfe72931041ab1c1e7a344e21200d480c06a4f7ac76ac"
