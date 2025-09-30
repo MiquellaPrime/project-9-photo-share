@@ -7,7 +7,7 @@ from .base import Base, str_255
 from .mixins import TimeMixin
 
 
-class PhotoOrm(Base, TimeMixin):
+class PhotoOrm(TimeMixin, Base):
     __tablename__ = "photos"
 
     uuid: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
