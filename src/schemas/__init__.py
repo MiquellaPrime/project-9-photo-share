@@ -1,4 +1,4 @@
-__all__ = ("HealthResponse", "PhotoCreateDTO")
+__all__ = ("HealthResponse", "PhotoCreateDTO", "PhotoDTO")
 
 from .meta import HealthResponse
-from .photo import PhotoCreateDTO
+from .photos import PhotoCreateDTO, PhotoDTO
