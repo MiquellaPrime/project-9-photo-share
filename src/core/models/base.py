@@ -14,6 +14,8 @@ timestamp_tz = Annotated[
     datetime,
     mapped_column(server_default=UTC_NOW_SQL),
 ]
+bool_t = Annotated[bool, mapped_column(server_default=text("TRUE"))]
+bool_f = Annotated[bool, mapped_column(server_default=text("FALSE"))]
 
 
 class Base(DeclarativeBase):
