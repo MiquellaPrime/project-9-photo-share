@@ -14,6 +14,7 @@ async def create_photo(
     """Create and persist a photo record."""
     photo_orm = PhotoOrm(
         uuid=body.uuid,
+        owner_id=body.owner_id,
         cloudinary_url=body.cloudinary_url,
         description=body.description,
     )
@@ -24,12 +25,14 @@ async def create_photo(
 
 async def get_photos(
     session: AsyncSession,
+    owner_id: int,
     offset: int = 0,
     limit: int = 10,
 ) -> list[PhotoOrm]:
     """Return a page of photos ordered by newest first."""
     stmt = (
         select(PhotoOrm)
+        .filter_by(owner_id=owner_id)
         .order_by(PhotoOrm.created_at.desc())
         .offset(offset)
         .limit(limit)
@@ -41,9 +44,10 @@ async def get_photos(
 async def get_photo_by_uuid(
     session: AsyncSession,
     photo_uuid: UUID,
+    owner_id: int,
 ) -> PhotoOrm | None:
     """Fetch a single photo by UUID."""
-    stmt = select(PhotoOrm).filter_by(uuid=photo_uuid)
+    stmt = select(PhotoOrm).filter_by(uuid=photo_uuid, owner_id=owner_id)
 
     result = await session.execute(stmt)
     return result.scalars().first()

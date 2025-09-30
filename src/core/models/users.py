@@ -1,9 +1,14 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.schemas import UserRoles
 
 from .base import Base, bool_f, bool_t, int_pk, str_150
 from .mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from .photos import PhotoOrm
 
 
 class UserOrm(TimestampMixin, Base):
@@ -15,3 +20,5 @@ class UserOrm(TimestampMixin, Base):
     role: Mapped[str] = mapped_column(default=UserRoles.USER)
     is_active: Mapped[bool_t]
     is_verified: Mapped[bool_f]
+
+    photos: Mapped[list["PhotoOrm"]] = relationship(back_populates="user")

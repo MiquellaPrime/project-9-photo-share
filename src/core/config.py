@@ -60,9 +60,6 @@ class JwtConfig(BaseModel):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 30
 
-    access_token_type: str = "access"
-    refresh_token_type: str = "refresh"
-
 
 class Settings(BaseSettings):
     """Main application settings container."""

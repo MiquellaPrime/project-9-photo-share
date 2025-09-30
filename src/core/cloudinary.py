@@ -29,11 +29,16 @@ class Cloudinary:
         )
         self.asset_folder = asset_folder
 
-    async def upload_image(self, photo_uuid: UUID, file: bytes) -> UploadImageResult:
+    async def upload_image(
+        self,
+        user_id: int,
+        photo_uuid: UUID,
+        file: bytes,
+    ) -> UploadImageResult:
         """Upload image under public_id=photo_uuid and return upload result."""
         options = {
             "public_id": str(photo_uuid),
-            "asset_folder": self.asset_folder,
+            "asset_folder": f"{self.asset_folder}/{user_id}",
             "use_asset_folder_as_public_id_prefix": False,
             "unique_filename": False,
             "resource_type": "image",
