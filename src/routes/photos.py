@@ -65,3 +65,33 @@ async def get_photo(
     if photo is None:
         raise HTTPException(status_code=404, detail="Photo not found")
     return photo
+
+
+@router.delete("/{photo_uuid}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_photo(
+    session: db_dependency,
+    photo_uuid: UUID,
+):
+    photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
+    if photo is None:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    await photos_crud.delete_photo(session=session, photo_uuid=photo_uuid)
+    return None
+
+
+@router.put("/{photo_uuid}", response_model=PhotoDTO)
+async def update_photo_description(
+    session: db_dependency,
+    photo_uuid: UUID,
+    description: Annotated[str, Form(min_length=1, max_length=255)],
+):
+    photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
+    if photo is None:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    update_photo = await photos_crud.update_photo_description(
+        session=session,
+        photo_uuid=photo_uuid,
+        description=description,
+    )
+    return update_photo

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.models import PhotoOrm
@@ -43,3 +43,24 @@ async def get_photo_by_uuid(
     stmt = select(PhotoOrm).where(PhotoOrm.uuid == photo_uuid)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def update_photo_description(
+    session: AsyncSession, photo_uuid: UUID, description: str
+) -> PhotoOrm | None:
+    stmt = (
+        update(PhotoOrm)
+        .where(PhotoOrm.uuid == photo_uuid)
+        .values(description=description)
+        .returning(PhotoOrm)
+    )
+    result = await session.execute(stmt)
+    await session.commit()
+    update_photo = result.scalar_one_or_none()
+    return update_photo
+
+
+async def delete_photo(session: AsyncSession, photo_uuid: UUID) -> None:
+    stmt = delete(PhotoOrm).where(PhotoOrm.uuid == photo_uuid)
+    await session.execute(stmt)
+    await session.commit()
