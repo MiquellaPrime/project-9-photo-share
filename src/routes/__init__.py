@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from . import photos as photos_router
+from .photos import router as photos_router
 
 router = APIRouter(prefix="/api")
 
