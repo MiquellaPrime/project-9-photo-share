@@ -10,7 +10,7 @@ async def create_user(session: AsyncSession, body: UserCreateDto) -> UserOrm:
     user = UserOrm(
         email=body.email,
         hashed_password=body.password,
-        role=UserRoles.user,
+        role=UserRoles.USER,
     )
     session.add(user)
     await session.commit()

@@ -24,7 +24,7 @@ async def signup(
             detail="User with this email already exists",
         )
 
-    user_data.hashed_password = pwd_context.hash_password(user_data.password)
+    user_data.password = pwd_context.hash_password(user_data.password)
 
     new_user = await create_user(session, user_data)
 
