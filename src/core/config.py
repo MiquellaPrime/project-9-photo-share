@@ -59,13 +59,6 @@ class JwtConfig(BaseModel):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
 
-    model_config = SettingsConfigDict(
-        env_prefix="JWT__",
-        env_file=(".env.template", ".env"),
-        env_nested_delimiter="__",
-        extra="ignore",
-    )
-
 
 class Settings(BaseSettings):
     """Main application settings container."""
