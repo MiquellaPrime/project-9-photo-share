@@ -1,13 +1,23 @@
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Path, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    HTTPException,
+    Path,
+    Query,
+    UploadFile,
+    status,
+)
 
 from src.core import cloudinary_cli
 from src.core.models import PhotoOrm
 from src.dependencies import db_dependency, limit_param, offset_param, user_dependency
 from src.repository import photos as photos_crud
-from src.schemas import PhotoCreateDto, PhotoDto, PhotoUpdateDto
+from src.schemas import PhotoCreateDto, PhotoDto, PhotoUpdateDto, TagsParam
+from src.services import photos as photos_service
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
@@ -44,22 +54,26 @@ async def upload_photo(
     session: db_dependency,
     user: user_dependency,
     file: UploadFile,
+    tags: Annotated[TagsParam, Query()],
     description: Annotated[str | None, Form(min_length=1, max_length=255)] = None,
 ):
     photo_uuid = uuid4()
-
     upload_result = await cloudinary_cli.upload_image(
         user_id=user.id,
         photo_uuid=photo_uuid,
         file=file.file,
     )
-    body = PhotoCreateDto(
+    photo_create = PhotoCreateDto(
         uuid=photo_uuid,
         owner_id=user.id,
         cloudinary_url=upload_result.secure_url,
         description=description,
     )
-    return await photos_crud.create_photo(session=session, body=body)
+    return await photos_service.create_photo_with_tags(
+        session=session,
+        photo_create=photo_create,
+        tags_param=tags,
+    )
 
 
 @router.get("", response_model=list[PhotoDto])

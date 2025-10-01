@@ -2,14 +2,16 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from src.core.models import PhotoOrm
+from src.core.models import PhotoOrm, TagOrm
 from src.schemas import PhotoCreateDto, PhotoUpdateDto
 
 
 async def create_photo(
     session: AsyncSession,
     body: PhotoCreateDto,
+    tags: list[TagOrm],
 ) -> PhotoOrm:
     """Create and persist a photo record."""
     photo_orm = PhotoOrm(
@@ -17,6 +19,7 @@ async def create_photo(
         owner_id=body.owner_id,
         cloudinary_url=body.cloudinary_url,
         description=body.description,
+        tags=tags,
     )
     session.add(photo_orm)
     await session.commit()
@@ -36,6 +39,7 @@ async def get_photos(
         .order_by(PhotoOrm.created_at.desc())
         .offset(offset)
         .limit(limit)
+        .options(selectinload(PhotoOrm.tags))
     )
     result = await session.execute(stmt)
     return list(result.scalars().all())
@@ -47,8 +51,11 @@ async def get_photo_by_uuid(
     owner_id: int,
 ) -> PhotoOrm | None:
     """Fetch a single photo by UUID."""
-    stmt = select(PhotoOrm).filter_by(uuid=photo_uuid, owner_id=owner_id)
-
+    stmt = (
+        select(PhotoOrm)
+        .filter_by(uuid=photo_uuid, owner_id=owner_id)
+        .options(selectinload(PhotoOrm.tags))
+    )
     result = await session.execute(stmt)
     return result.scalars().first()
 
