@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.cloudinary import cloudinary_cli
@@ -17,7 +17,7 @@ router = APIRouter(
 db_dependency = Annotated[AsyncSession, Depends(db_helper.session_getter)]
 
 
-@router.post("/upload", response_model=PhotoDTO, status_code=201)
+@router.post("/upload", response_model=PhotoDTO, status_code=status.HTTP_201_CREATED)
 async def upload_photo(
     session: db_dependency,
     file: UploadFile,
@@ -25,8 +25,11 @@ async def upload_photo(
 ):
     photo_uuid = uuid4()
 
+    file_bytes = await file.read()
+
     upload_result = await cloudinary_cli.upload_image(
-        photo_uuid=photo_uuid, file=file.file
+        photo_uuid=photo_uuid,
+        file=file_bytes,
     )
 
     photo_create = PhotoCreateDTO(
