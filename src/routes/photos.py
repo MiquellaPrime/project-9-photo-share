@@ -33,13 +33,13 @@ async def upload_photo(
     )
 
     photo_create = PhotoCreateDTO(
-        uuid=str(photo_uuid),
+        uuid=photo_uuid,
         filename=file.filename,
-        url=upload_result.url,
-        description=description,
+        cloudinary_url=upload_result.secure_url,
+        description=description or None,
     )
 
-    new_photo = await photos_crud.create_photo(session=session, photo=photo_create)
+    new_photo = await photos_crud.create_photo(session=session, body=photo_create)
 
     return new_photo
 
