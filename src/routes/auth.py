@@ -24,14 +24,8 @@ async def signup(
             detail="User with this email already exists",
         )
 
-    hashed_password = pwd_context.hash_password(user_data.password)
+    user_data.hashed_password = pwd_context.hash_password(user_data.password)
 
-    new_user = await create_user(
-        session, UserCreateDto(email=user_data.email, hashed_password=hashed_password)
-    )
-
-    session.add(new_user)
-    await session.commit()
-    await session.refresh(new_user)
+    new_user = await create_user(session, user_data)
 
     return new_user
