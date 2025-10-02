@@ -42,8 +42,7 @@ class DatabaseHelper:
             try:
                 yield session
             except Exception:
-                await session.rollback()
-                raise
+                await session.rollback()  
 
 
 db_helper = DatabaseHelper(

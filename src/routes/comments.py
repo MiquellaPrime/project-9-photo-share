@@ -108,7 +108,6 @@ async def get_comments_by_photo(
 ) -> PaginatedResponse[CommentDto]:
     """Get comments for a photo with pagination. Sorted by created_at ASC."""
     try:
-        # Check if photo exists
         photo = await photos_repo.get_photo_by_uuid(session, photo_uuid)
         if photo is None:
             raise HTTPException(

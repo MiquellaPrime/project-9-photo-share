@@ -14,11 +14,11 @@ class PaginationParams(BaseModel):
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    items: list[T]
-    total: int
-    offset: int
-    limit: int
-    has_next: bool
+    items: list[T]          
+    total: int              
+    offset: int            
+    limit: int             
+    has_next: bool         
 
 
 class ErrorResponse(BaseModel):
