@@ -3,9 +3,10 @@ from typing import Any
 from uuid import UUID
 
 import cloudinary
+from cloudinary import CloudinaryImage
 from cloudinary.uploader import destroy, upload
 
-from src.schemas import UploadImageResult
+from src.schemas import TransformRequest, UploadImageResult
 
 from .config import settings
 
@@ -56,6 +57,14 @@ class Cloudinary:
             "invalidate": True,
         }
         await asyncio.to_thread(destroy, public_id=public_id, **options)
+
+    def transform_image(
+        self,
+        photo_uuid: UUID,
+        transformations: TransformRequest,
+    ) -> str:
+        image = CloudinaryImage(public_id=str(photo_uuid))
+        return image.build_url(**transformations.model_dump())
 
 
 cloudinary_cli = Cloudinary(
