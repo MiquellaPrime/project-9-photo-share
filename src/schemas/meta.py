@@ -19,3 +19,10 @@ class PaginatedResponse(BaseModel, Generic[T]):
     offset: int
     limit: int
     has_next: bool
+
+
+class ErrorResponse(BaseModel):
+    """Standard error response model."""
+    detail: str
+    error_code: str | None = None
+    timestamp: str | None = None
