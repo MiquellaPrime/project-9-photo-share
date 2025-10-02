@@ -4,5 +4,5 @@ from .base import UTC_NOW_SQL, timestamp_tz
 
 
 class TimestampMixin:
-    created_at: Mapped[timestamp_tz]
+    created_at: Mapped[timestamp_tz] = mapped_column(server_default=UTC_NOW_SQL)
     updated_at: Mapped[timestamp_tz] = mapped_column(onupdate=UTC_NOW_SQL)

@@ -1,9 +1,11 @@
+from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, str_255
+from .associations import photos_tags
+from .base import Base
 from .mixins import TimestampMixin
 
 
@@ -12,4 +14,8 @@ class PhotoOrm(TimestampMixin, Base):
 
     uuid: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     cloudinary_url: Mapped[str] = mapped_column(Text, nullable=False)
-    description: Mapped[str_255 | None]
+    description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
+    tags = relationship(
+        "TagOrm", secondary=photos_tags, back_populates="photos", lazy="selectin"
+    )
