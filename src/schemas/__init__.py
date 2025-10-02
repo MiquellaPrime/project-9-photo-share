@@ -1,6 +1,7 @@
 __all__ = (
     "TokenData",
     "TokenInfo",
+    "TransformRequest",
     "UploadImageResult",
     "UserRoles",
     "HealthResponse",
@@ -14,7 +15,7 @@ __all__ = (
 )
 
 from .auth import TokenData, TokenInfo
-from .cloudinary import UploadImageResult
+from .cloudinary import TransformRequest, UploadImageResult
 from .enums import UserRoles
 from .meta import HealthResponse
 from .photos import PhotoCreateDto, PhotoDto, PhotoUpdateDto
