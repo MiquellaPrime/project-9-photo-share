@@ -44,7 +44,7 @@ async def upload_photo(
     return new_photo
 
 
-@router.get("/", response_model=list[PhotoDTO])
+@router.get("/", response_model=list[PhotoDTO], status_code=status.HTTP_200_OK)
 async def get_photos(
     session: db_dependency,
     offset: int = 0,
@@ -55,7 +55,7 @@ async def get_photos(
     return photos
 
 
-@router.get("/{photo_uuid}", response_model=PhotoDTO)
+@router.get("/{photo_uuid}", response_model=PhotoDTO, status_code=status.HTTP_200_OK)
 async def get_photo(
     session: db_dependency,
     photo_uuid: UUID,
@@ -75,11 +75,11 @@ async def delete_photo(
     photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
     if photo is None:
         raise HTTPException(status_code=404, detail="Photo not found")
-    await photos_crud.delete_photo(session=session, photo_uuid=photo_uuid)
+    await photos_crud.delete_photo(session=session, photo=photo)
     return None
 
 
-@router.put("/{photo_uuid}", response_model=PhotoDTO)
+@router.put("/{photo_uuid}", response_model=PhotoDTO, status_code=status.HTTP_200_OK)
 async def update_photo_description(
     session: db_dependency,
     photo_uuid: UUID,
@@ -89,9 +89,9 @@ async def update_photo_description(
     if photo is None:
         raise HTTPException(status_code=404, detail="Photo not found")
 
-    update_photo = await photos_crud.update_photo_description(
+    updated_photo = await photos_crud.update_photo_description(
         session=session,
-        photo_uuid=photo_uuid,
+        photo=photo,
         description=description,
     )
-    return update_photo
+    return updated_photo
