@@ -63,7 +63,9 @@ async def get_photo(
     photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
 
     if photo is None:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
     return photo
 
 
@@ -74,7 +76,9 @@ async def delete_photo(
 ):
     photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
     if photo is None:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
     await photos_crud.delete_photo(session=session, photo=photo)
     return None
 
@@ -87,7 +91,9 @@ async def update_photo_description(
 ):
     photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
     if photo is None:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
 
     updated_photo = await photos_crud.update_photo_description(
         session=session,
