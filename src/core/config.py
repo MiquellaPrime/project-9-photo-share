@@ -51,6 +51,15 @@ class CloudinaryConfig(BaseModel):
     asset_folder: str = "photo-share"
 
 
+class JwtConfig(BaseModel):
+    """JWT configuration."""
+
+    secret: str
+    algorithm: str
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
+
 class Settings(BaseSettings):
     """Main application settings container."""
 
@@ -62,6 +71,7 @@ class Settings(BaseSettings):
     )
     db: DatabaseConfig
     cloudinary: CloudinaryConfig
+    jwt: JwtConfig
 
 
 settings = Settings()

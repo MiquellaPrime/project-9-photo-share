@@ -1,7 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models.users import UserOrm, UserRole
+from src.core.models.users import UserOrm
+from src.schemas.enums import UserRoles
 from src.schemas.users import UserCreateDto
 
 
@@ -9,7 +10,7 @@ async def create_user(session: AsyncSession, body: UserCreateDto) -> UserOrm:
     user = UserOrm(
         email=body.email,
         hashed_password=body.password,
-        role=UserRole.user,
+        role=UserRoles.USER,
     )
     session.add(user)
     await session.commit()
