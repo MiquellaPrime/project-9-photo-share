@@ -15,12 +15,11 @@ class TokenService:
         payload = {
             "sub": user.id,
             "user_id": user.id,
-            "role": user.role.value,
+            "role": user.role,
             "token_type": ACCESS_TOKEN_TYPE,
         }
-        return self._create_jwt(
-            payload, expire_minutes=settings.jwt.access_token_expire_minutes
-        )
+        expire_delta = timedelta(minutes=settings.jwt.access_token_expire_minutes)
+        return self._create_jwt(payload, expire_delta=expire_delta)
 
     def create_refresh_token(self, user: UserOrm) -> str:
         payload = {
@@ -28,9 +27,8 @@ class TokenService:
             "user_id": user.id,
             "token_type": REFRESH_TOKEN_TYPE,
         }
-        return self._create_jwt(
-            payload, expire_minutes=settings.jwt.access_token_expire_days * 24 * 60
-        )
+        expire_delta = timedelta(days=settings.jwt.refresh_token_expire_days)
+        return self._create_jwt(payload, expire_delta=expire_delta)
 
     def decode_token(self, token: str, token_type: str) -> TokenData:
         try:
@@ -54,10 +52,10 @@ class TokenService:
                 detail="Could not validate credentials",
             )
 
-    def _create_jwt(self, payload: dict, expire_minutes: int) -> str:
+    def _create_jwt(self, payload: dict, expire_delta: timedelta) -> str:
         to_encode = payload.copy()
         now = datetime.now(timezone.utc)
-        expire = now + timedelta(minutes=expire_minutes)
+        expire = now + expire_delta
         to_encode.update({"iat": now, "exp": expire})
         return self._encode_jwt(to_encode)
 
