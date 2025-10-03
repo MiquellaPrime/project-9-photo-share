@@ -12,7 +12,6 @@ async def create_photo(session: AsyncSession, body: PhotoCreateDTO) -> PhotoOrm:
     photo = PhotoOrm(
         uuid=body.uuid,
         cloudinary_url=body.cloudinary_url,
-        cloudinary_id=body.cloudinary_id,
         description=body.description,
     )
     session.add(photo)
