@@ -31,11 +31,13 @@ async def upload_photo(
         photo_uuid=photo_uuid,
         file=file_bytes,
     )
+    cloudinary_id = getattr(upload_result, "public_id", str(photo_uuid))
 
     photo_create = PhotoCreateDTO(
         uuid=photo_uuid,
         filename=file.filename,
         cloudinary_url=upload_result.secure_url,
+        cloudinary_id=cloudinary_id,
         description=description or None,
     )
 
@@ -78,6 +80,29 @@ async def delete_photo(
     if photo is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
+    try:
+        destroy_result = await cloudinary_cli.destroy_image(photo.cloudinary_id)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to delete image in Cloudinary",
+        ) from exc
+
+    result_value = None
+    if isinstance(destroy_result, dict):
+        result_value = destroy_result.get("result")
+    elif isinstance(destroy_result, str):
+        result_value = destroy_result
+
+    if result_value is not None and str(result_value).lower() not in {
+        "ok",
+        "not_found",
+        "not found",
+    }:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Cloudinary deletion returned unexpected result: {destroy_result}",
         )
     await photos_crud.delete_photo(session=session, photo=photo)
     return None

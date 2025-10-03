@@ -42,7 +42,7 @@ class CloudinaryClient:
         result: dict[str, Any] = await asyncio.to_thread(upload, file=file, **options)
         return UploadImageResult(**result)
 
-    async def destroy_image(self, photo_uuid: UUID) -> None:
+    async def destroy_image(self, photo_uuid: UUID) -> dict[str, Any]:
         """Delete image by public_id and invalidate caches."""
         public_id = str(photo_uuid)
         options = {
@@ -50,7 +50,8 @@ class CloudinaryClient:
             "type": "upload",
             "invalidate": True,
         }
-        await asyncio.to_thread(destroy, public_id=public_id, **options)
+        result: dict[str, Any] = await asyncio.to_thread(destroy, public_id, **options)
+        return result
 
 
 cloudinary_cli = CloudinaryClient(

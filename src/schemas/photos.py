@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class PhotoBaseDto(BaseModel):
     uuid: UUID
     cloudinary_url: str
+    cloudinary_id: str
     description: str | None = Field(None, min_length=1, max_length=255)
 
 
