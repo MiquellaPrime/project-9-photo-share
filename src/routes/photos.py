@@ -44,7 +44,7 @@ async def upload_photo(
     return new_photo
 
 
-@router.get("/", response_model=list[PhotoDTO])
+@router.get("/", response_model=list[PhotoDTO], status_code=status.HTTP_200_OK)
 async def get_photos(
     session: db_dependency,
     offset: int = 0,
@@ -55,7 +55,7 @@ async def get_photos(
     return photos
 
 
-@router.get("/{photo_uuid}", response_model=PhotoDTO)
+@router.get("/{photo_uuid}", response_model=PhotoDTO, status_code=status.HTTP_200_OK)
 async def get_photo(
     session: db_dependency,
     photo_uuid: UUID,
@@ -63,5 +63,64 @@ async def get_photo(
     photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
 
     if photo is None:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
     return photo
+
+
+@router.delete("/{photo_uuid}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_photo(
+    session: db_dependency,
+    photo_uuid: UUID,
+):
+    photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
+    if not photo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
+    try:
+        destroy_result = await cloudinary_cli.destroy_image(photo.uuid)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to delete image in Cloudinary",
+        ) from exc
+
+    result_value = None
+    if isinstance(destroy_result, dict):
+        result_value = destroy_result.get("result")
+    elif isinstance(destroy_result, str):
+        result_value = destroy_result
+
+    if result_value is not None and str(result_value).lower() not in {
+        "ok",
+        "not_found",
+        "not found",
+    }:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Cloudinary deletion returned unexpected result: {destroy_result}",
+        )
+    await photos_crud.delete_photo(session=session, photo=photo)
+    return None
+
+
+@router.put("/{photo_uuid}", response_model=PhotoDTO, status_code=status.HTTP_200_OK)
+async def update_photo_description(
+    session: db_dependency,
+    photo_uuid: UUID,
+    description: Annotated[str, Form(min_length=1, max_length=255)],
+):
+    photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
+    if photo is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
+
+    updated_photo = await photos_crud.update_photo_description(
+        session=session,
+        photo=photo,
+        description=description,
+    )
+    return updated_photo

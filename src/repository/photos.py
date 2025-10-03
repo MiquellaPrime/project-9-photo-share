@@ -16,6 +16,7 @@ async def create_photo(session: AsyncSession, body: PhotoCreateDTO) -> PhotoOrm:
     )
     session.add(photo)
     await session.commit()
+    await session.refresh(photo)
     return photo
 
 
@@ -43,3 +44,17 @@ async def get_photo_by_uuid(
     stmt = select(PhotoOrm).where(PhotoOrm.uuid == photo_uuid)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def update_photo_description(
+    session: AsyncSession, photo: PhotoOrm, description: str
+) -> PhotoOrm:
+    photo.description = description
+    await session.commit()
+    await session.refresh(photo)
+    return photo
+
+
+async def delete_photo(session: AsyncSession, photo: PhotoOrm) -> None:
+    await session.delete(photo)
+    await session.commit()
