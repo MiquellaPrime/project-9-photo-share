@@ -11,11 +11,6 @@ from src.schemas import TokenData
 
 class TokenService:
 
-    def __init__(self):
-        self.secret = settings.jwt.secret
-        self.algorithm = settings.jwt.algorithm
-        self.access_token_expire_minutes = settings.jwt.access_token_expire_minutes
-
     def create_access_token(self, user: UserOrm) -> str:
         payload = {
             "sub": user.id,
@@ -24,7 +19,7 @@ class TokenService:
             "token_type": ACCESS_TOKEN_TYPE,
         }
         return self._create_jwt(
-            payload, expire_minutes=self.access_token_expire_minutes
+            payload, expire_minutes=settings.jwt.access_token_expire_minutes
         )
 
     def create_refresh_token(self, user: UserOrm) -> str:
@@ -34,7 +29,7 @@ class TokenService:
             "token_type": REFRESH_TOKEN_TYPE,
         }
         return self._create_jwt(
-            payload, expire_minutes=self.access_token_expire_minutes
+            payload, expire_minutes=settings.jwt.access_token_expire_days * 24 * 60
         )
 
     def decode_token(self, token: str, token_type: str) -> TokenData:
@@ -43,7 +38,7 @@ class TokenService:
             if payload.get(TOKEN_TYPE_FIELD) != token_type:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Invalid token type. Expected {token_type}",
+                    detail="Invalid token type",
                 )
             user_id = payload.get("user_id")
             if user_id is None:
@@ -53,10 +48,10 @@ class TokenService:
                 )
             role = payload.get("role")
             return TokenData(user_id=user_id, role=role)
-        except jwt.InvalidTokenError as e:
+        except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Could not validate credentials: {str(e)}",
+                detail="Could not validate credentials",
             )
 
     def _create_jwt(self, payload: dict, expire_minutes: int) -> str:
@@ -67,7 +62,11 @@ class TokenService:
         return self._encode_jwt(to_encode)
 
     def _encode_jwt(self, payload: dict) -> str:
-        return jwt.encode(payload, self.secret, algorithm=self.algorithm)
+        return jwt.encode(
+            payload, settings.jwt.secret, algorithm=settings.jwt.algorithm
+        )
 
     def _decode_jwt(self, token: str) -> dict:
-        return jwt.decode(token, self.secret, algorithms=self.algorithm)
+        return jwt.decode(
+            token, settings.jwt.secret, algorithms=[settings.jwt.algorithm]
+        )
