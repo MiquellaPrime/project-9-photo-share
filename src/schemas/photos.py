@@ -1,7 +1,10 @@
 from datetime import datetime
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from src.schemas.tags import TagCreateDTO, TagDTO
 
 
 class PhotoBaseDto(BaseModel):
@@ -11,7 +14,7 @@ class PhotoBaseDto(BaseModel):
 
 
 class PhotoCreateDTO(PhotoBaseDto):
-    pass
+    tags: list[TagCreateDTO] = []
 
 
 class PhotoDTO(PhotoBaseDto):
@@ -19,3 +22,4 @@ class PhotoDTO(PhotoBaseDto):
 
     created_at: datetime
     updated_at: datetime
+    tags: List[TagDTO] = []
