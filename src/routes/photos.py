@@ -110,5 +110,7 @@ async def get_photo(
     photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
 
     if photo is None:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found"
+        )
     return photo
