@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -17,6 +18,7 @@ class UserDto(UserBaseDto):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    uuid: UUID
     role: UserRoles
     is_active: bool
     is_verified: bool

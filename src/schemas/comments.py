@@ -21,6 +21,6 @@ class CommentDto(CommentBaseDto):
 
     uuid: UUID
     photo_uuid: UUID
-    user_id: int
+    user_id: UUID
     created_at: datetime
     updated_at: datetime

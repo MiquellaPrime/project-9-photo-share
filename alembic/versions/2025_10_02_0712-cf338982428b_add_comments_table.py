@@ -14,7 +14,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "cf338982428b"
-down_revision: Union[str, Sequence[str], None] = "37973af9fab2"
+down_revision: Union[str, Sequence[str], None] = "588950002226"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -26,7 +26,7 @@ def upgrade() -> None:
         "comments",
         sa.Column("uuid", sa.Uuid(), nullable=False),
         sa.Column("photo_uuid", sa.Uuid(), nullable=False),
-        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Uuid(), nullable=False),
         sa.Column("text", sa.Text(), nullable=False),
         sa.Column(
             "created_at",
@@ -48,7 +48,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],
-            ["users.id"],
+            ["users.uuid"],
             name=op.f("fk_comments_user_id_users"),
             ondelete="RESTRICT",
         ),

@@ -18,9 +18,10 @@ from src.schemas import (
 
 router = APIRouter(prefix="/comments", tags=["comments"])
 
-async def get_current_user_id() -> int:
+async def get_current_user_id() -> UUID:
     """Temporary function to get current user ID. Replace with actual auth."""
-    return 1  
+    from uuid import uuid4
+    return uuid4()  # Mock UUID for now  
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -45,7 +46,7 @@ async def create_comment(
     photo_uuid: UUID,
     body: CommentCreateDto,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-    current_user_id: Annotated[int, Depends(get_current_user_id)],
+    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
 ) -> CommentDto:
     """Create a comment under a photo."""
     if body.photo_uuid != photo_uuid:
@@ -185,10 +186,11 @@ async def update_comment(
     comment_uuid: UUID,
     body: CommentUpdateDto,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-    current_user_id: Annotated[int, Depends(get_current_user_id)],
+    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
 ) -> CommentDto:
     """Update a comment's text."""
     try:
+        # Check if comment exists and user owns it
         existing_comment = await comments_repo.get_comment_by_uuid(session, comment_uuid)
         
         if existing_comment is None:
@@ -203,13 +205,8 @@ async def update_comment(
                 detail="You can only edit your own comments"
             )
         
-        updated_comment = await comments_repo.update_comment(session, comment_uuid, body)
-        
-        if updated_comment is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Comment not found"
-            )
+        # Update the comment using ORM style (reuse existing comment object)
+        updated_comment = await comments_repo.update_comment(session, existing_comment, body)
         
         return CommentDto.model_validate(updated_comment)
         
@@ -240,7 +237,7 @@ async def update_comment(
 async def delete_comment(
     comment_uuid: UUID,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-    current_user_id: Annotated[int, Depends(get_current_user_id)],
+    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
 ) -> None:
     """Delete a comment by its UUID."""
     try:
@@ -258,13 +255,8 @@ async def delete_comment(
                 detail="You can only delete your own comments"
             )
         
-        deleted = await comments_repo.delete_comment(session, comment_uuid)
-        
-        if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Comment not found"
-            )
+        # Delete using ORM style (reuse existing comment object)
+        await comments_repo.delete_comment(session, existing_comment)
             
     except SQLAlchemyError:
         await session.rollback()

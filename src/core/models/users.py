@@ -1,3 +1,5 @@
+from uuid import UUID, uuid4
+
 from sqlalchemy import Text
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -11,6 +13,7 @@ class UserOrm(TimestampMixin, Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    uuid: Mapped[UUID] = mapped_column(unique=True, default=uuid4)
     email: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str] = mapped_column(Text)
     role: Mapped[str] = mapped_column(default=UserRoles.USER)
