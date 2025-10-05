@@ -1,15 +1,19 @@
 __all__ = (
     "UploadImageResult",
+    "UserRoles",
     "HealthResponse",
-    "PhotoCreateDTO",
-    "PhotoDTO",
+    "PhotoCreateDto",
+    "PhotoDto",
+    "PhotoUpdateDto",
     "UserCreateDto",
     "UserDto",
     "TokenData",
+    "TokenInfo",
 )
 
 from .cloudinary import UploadImageResult
+from .enums import UserRoles
 from .meta import HealthResponse
-from .photos import PhotoCreateDTO, PhotoDTO
-from .token import TokenData
+from .photos import PhotoCreateDto, PhotoDto, PhotoUpdateDto
+from .token import TokenData, TokenInfo
 from .users import UserCreateDto, UserDto

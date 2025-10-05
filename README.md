@@ -55,7 +55,7 @@ You can run the app locally using your own PostgreSQL or by starting only the da
    ```
 3. Run the app:
    ```bash
-   uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+   uvicorn src1.main:app --reload --host 0.0.0.0 --port 8000
    ```
 4. Open:
    - Docs: `http://localhost:8000/docs`
@@ -76,7 +76,7 @@ You can run the app locally using your own PostgreSQL or by starting only the da
    ```
 4. Run the app:
    ```bash
-   uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+   uvicorn src1.main:app --reload --host 0.0.0.0 --port 8000
    ```
 5. Open:
    - Docs: `http://localhost:8000/docs`
