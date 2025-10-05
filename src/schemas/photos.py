@@ -3,19 +3,30 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .tags import TagsDto
 
-class PhotoBaseDto(BaseModel):
+
+class BaseModelWithConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PhotoBaseDto(BaseModelWithConfig):
     uuid: UUID
+    owner_id: int
     cloudinary_url: str
-    description: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = None
 
 
-class PhotoCreateDTO(PhotoBaseDto):
+class PhotoCreateDto(PhotoBaseDto):
     pass
 
 
-class PhotoDTO(PhotoBaseDto):
-    model_config = ConfigDict(from_attributes=True)
-
+class PhotoDto(PhotoBaseDto):
     created_at: datetime
     updated_at: datetime
+
+    tags: list[TagsDto]
+
+
+class PhotoUpdateDto(BaseModel):
+    description: str | None = Field(default=None, min_length=1, max_length=255)
