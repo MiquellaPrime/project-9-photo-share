@@ -48,14 +48,15 @@ async def get_photos(
 async def get_photo_by_uuid(
     session: AsyncSession,
     photo_uuid: UUID,
-    owner_id: int,
+    owner_id: int | None = None,
 ) -> PhotoOrm | None:
     """Fetch a single photo by UUID."""
-    stmt = (
-        select(PhotoOrm)
-        .filter_by(uuid=photo_uuid, owner_id=owner_id)
-        .options(selectinload(PhotoOrm.tags))
-    )
+    stmt = select(PhotoOrm).filter_by(uuid=photo_uuid)
+    if owner_id:
+        stmt = stmt.filter_by(owner_id=owner_id)
+
+    stmt = stmt.options(selectinload(PhotoOrm.tags))
+
     result = await session.execute(stmt)
     return result.scalars().first()
 

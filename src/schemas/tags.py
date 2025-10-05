@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TagsParam(BaseModel):
@@ -17,6 +17,8 @@ class TagsParam(BaseModel):
 
 
 class TagsDto(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     uuid: UUID
     name: str
     created_at: datetime
