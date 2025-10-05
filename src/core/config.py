@@ -56,6 +56,7 @@ class JwtConfig(BaseModel):
 
     secret: str
     algorithm: str
+
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
 

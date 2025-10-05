@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from src.constants import REFRESH_TOKEN_TYPE
 from src.core.models import UserOrm
 from src.dependencies import db_dependency, token_service_dependency
 from src.repository import users_crud
@@ -46,3 +47,20 @@ async def login(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
+
+@router.post(
+    "/refresh",
+    response_model=TokenInfo,
+    response_model_exclude_none=True,
+)
+async def refresh_access_token(
+    user: Annotated[
+        UserOrm,
+        Depends(auth_service.get_current_user(from_token_type=REFRESH_TOKEN_TYPE)),
+    ],
+    token_service: token_service_dependency,
+):
+    access_token = token_service.create_access_token(user=user)
+
+    return TokenInfo(access_token=access_token)
