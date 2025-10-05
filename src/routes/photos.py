@@ -7,6 +7,7 @@ from fastapi import (
     Form,
     HTTPException,
     Path,
+    Query,
     UploadFile,
     status,
 )
@@ -15,7 +16,8 @@ from src.core import cloudinary_cli
 from src.core.models import PhotoOrm
 from src.dependencies import db_dependency, limit_param, offset_param
 from src.repository import photos_crud
-from src.schemas import PhotoCreateDto, PhotoDto, PhotoUpdateDto
+from src.schemas import PhotoCreateDto, PhotoDto, PhotoUpdateDto, TagsParam
+from src.services import photos_service
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
@@ -48,6 +50,7 @@ photo_orm_dependency = Annotated[PhotoOrm, Depends(photo_by_uuid)]
 async def upload_photo(
     session: db_dependency,
     file: UploadFile,
+    tags_param: Annotated[TagsParam, Query()],
     description: Annotated[str | None, Form(min_length=1, max_length=255)] = None,
 ):
     photo_uuid = uuid4()
@@ -60,9 +63,10 @@ async def upload_photo(
         cloudinary_url=upload_result.secure_url,
         description=description,
     )
-    return await photos_crud.create_photo(
+    return await photos_service.create_photo_with_tags(
         session=session,
-        body=photo_create,
+        photo_create=photo_create,
+        tags_param=tags_param,
     )
 
 
