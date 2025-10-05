@@ -19,11 +19,7 @@ class CommentOrm(TimestampMixin, Base):
         ForeignKey("photos.uuid", ondelete="CASCADE"),
     )
     user_id: Mapped[int] = mapped_column(
-<<<<<<< Updated upstream
-        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
-=======
         ForeignKey("users.id", ondelete="RESTRICT"),
->>>>>>> Stashed changes
     )
     text: Mapped[str] = mapped_column(Text)
 
