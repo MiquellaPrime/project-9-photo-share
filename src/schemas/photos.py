@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .tags import TagsDto
+
 
 class BaseModelWithConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -21,6 +23,8 @@ class PhotoCreateDto(PhotoBaseDto):
 class PhotoDto(PhotoBaseDto):
     created_at: datetime
     updated_at: datetime
+
+    tags: list[TagsDto]
 
 
 class PhotoUpdateDto(BaseModel):

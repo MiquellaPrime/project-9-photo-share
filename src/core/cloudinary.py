@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any
+from typing import Any, BinaryIO
 from uuid import UUID
 
 import cloudinary
@@ -29,7 +29,7 @@ class CloudinaryClient:
         )
         self.asset_folder = asset_folder
 
-    async def upload_image(self, photo_uuid: UUID, file: bytes) -> UploadImageResult:
+    async def upload_image(self, photo_uuid: UUID, file: BinaryIO) -> UploadImageResult:
         """Upload image under public_id=photo_uuid and return upload result."""
         options = {
             "public_id": str(photo_uuid),
