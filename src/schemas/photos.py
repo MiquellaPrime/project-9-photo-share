@@ -12,6 +12,7 @@ class BaseModelWithConfig(BaseModel):
 
 class PhotoBaseDto(BaseModelWithConfig):
     uuid: UUID
+    owner_id: int
     cloudinary_url: str
     description: str | None = None
 
