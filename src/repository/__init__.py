@@ -1,7 +1,7 @@
 __all__ = (
-    "create_photo",
-    "get_photos",
-    "get_photo_by_uuid",
+    "photos_crud",
+    "users_crud",
 )
 
-from .photos import create_photo, get_photo_by_uuid, get_photos
+from . import photos as photos_crud
+from . import users as users_crud
