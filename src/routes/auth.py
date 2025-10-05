@@ -9,7 +9,10 @@ from src.repository import users_crud
 from src.schemas import TokenInfo, UserCreateDto, UserDto
 from src.services import PasswordHashService, auth_service
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+)
 
 
 @router.post(
