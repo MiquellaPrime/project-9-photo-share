@@ -1,67 +1,110 @@
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.core.cloudinary import cloudinary_cli
-from src.core.database import db_helper
-from src.repository import photos as photos_crud
-from src.schemas import PhotoCreateDTO, PhotoDTO
-
-router = APIRouter(
-    prefix="/photos",
-    tags=["photos"],
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    HTTPException,
+    Path,
+    UploadFile,
+    status,
 )
 
-db_dependency = Annotated[AsyncSession, Depends(db_helper.session_getter)]
+from src.core import cloudinary_cli
+from src.core.models import PhotoOrm
+from src.dependencies import db_dependency, limit_param, offset_param
+from src.repository import photos_crud
+from src.schemas import PhotoCreateDto, PhotoDto, PhotoUpdateDto
+
+router = APIRouter(prefix="/photos", tags=["photos"])
 
 
-@router.post("/upload", response_model=PhotoDTO, status_code=status.HTTP_201_CREATED)
+async def photo_by_uuid(
+    session: db_dependency,
+    photo_uuid: Annotated[UUID, Path],
+) -> PhotoOrm:
+    """Dependency resolver: returns PhotoOrm by path UUID or raises 404."""
+    photo = await photos_crud.get_photo_by_uuid(
+        session=session,
+        photo_uuid=photo_uuid,
+    )
+    if photo is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Photo '{photo_uuid}' not found",
+        )
+    return photo
+
+
+photo_orm_dependency = Annotated[PhotoOrm, Depends(photo_by_uuid)]
+
+
+@router.post(
+    "/upload",
+    response_model=PhotoDto,
+    status_code=status.HTTP_201_CREATED,
+)
 async def upload_photo(
     session: db_dependency,
     file: UploadFile,
-    description: Annotated[Optional[str], Form(min_length=1, max_length=255)] = None,
+    description: Annotated[str | None, Form(min_length=1, max_length=255)] = None,
 ):
     photo_uuid = uuid4()
-
-    file_bytes = await file.read()
-
     upload_result = await cloudinary_cli.upload_image(
         photo_uuid=photo_uuid,
-        file=file_bytes,
+        file=file.file,
     )
-
-    photo_create = PhotoCreateDTO(
+    photo_create = PhotoCreateDto(
         uuid=photo_uuid,
-        filename=file.filename,
         cloudinary_url=upload_result.secure_url,
-        description=description or None,
+        description=description,
+    )
+    return await photos_crud.create_photo(
+        session=session,
+        body=photo_create,
     )
 
-    new_photo = await photos_crud.create_photo(session=session, body=photo_create)
 
-    return new_photo
-
-
-@router.get("/", response_model=list[PhotoDTO])
-async def get_photos(
+@router.get("", response_model=list[PhotoDto])
+async def get_all_photos(
     session: db_dependency,
-    offset: int = 0,
-    limit: int = 10,
+    offset: offset_param = 0,
+    limit: limit_param = 10,
 ):
-
-    photos = await photos_crud.get_photos(session=session, offset=offset, limit=limit)
+    photos = await photos_crud.get_photos(
+        session=session,
+        offset=offset,
+        limit=limit,
+    )
     return photos
 
 
-@router.get("/{photo_uuid}", response_model=PhotoDTO)
-async def get_photo(
-    session: db_dependency,
-    photo_uuid: UUID,
+@router.get("/{photo_uuid}", response_model=PhotoDto)
+async def get_photo_by_uuid(
+    photo_orm: photo_orm_dependency,
 ):
-    photo = await photos_crud.get_photo_by_uuid(session=session, photo_uuid=photo_uuid)
+    return photo_orm
 
-    if photo is None:
-        raise HTTPException(status_code=404, detail="Photo not found")
+
+@router.put("/{photo_uuid}", response_model=PhotoDto)
+async def update_photo(
+    session: db_dependency,
+    photo_orm: photo_orm_dependency,
+    photo_update: PhotoUpdateDto,
+):
+    photo = await photos_crud.update_photo(
+        session=session,
+        photo_orm=photo_orm,
+        body=photo_update,
+    )
     return photo
+
+
+@router.delete("/{photo_uuid}")
+async def delete_photo(
+    session: db_dependency,
+    photo_orm: photo_orm_dependency,
+):
+    await cloudinary_cli.destroy_image(photo_uuid=photo_orm.uuid)
+    await photos_crud.delete_photo(session=session, photo_orm=photo_orm)

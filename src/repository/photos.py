@@ -4,10 +4,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.models import PhotoOrm
-from src.schemas import PhotoCreateDTO
+from src.schemas import PhotoCreateDto, PhotoUpdateDto
 
 
-async def create_photo(session: AsyncSession, body: PhotoCreateDTO) -> PhotoOrm:
+async def create_photo(
+    session: AsyncSession,
+    body: PhotoCreateDto,
+) -> PhotoOrm:
     """Create and persist a photo record."""
     photo = PhotoOrm(
         uuid=body.uuid,
@@ -40,6 +43,28 @@ async def get_photo_by_uuid(
     photo_uuid: UUID,
 ) -> PhotoOrm | None:
     """Fetch a single photo by UUID."""
-    stmt = select(PhotoOrm).where(PhotoOrm.uuid == photo_uuid)
+    stmt = select(PhotoOrm).filter_by(uuid=photo_uuid)
     result = await session.execute(stmt)
-    return result.scalar_one_or_none()
+    return result.scalars().first()
+
+
+async def update_photo(
+    session: AsyncSession,
+    photo_orm: PhotoOrm,
+    body: PhotoUpdateDto,
+) -> PhotoOrm:
+    """Apply a partial update to an existing photo."""
+    photo_orm.description = body.description
+
+    await session.commit()
+    await session.refresh(photo_orm)
+    return photo_orm
+
+
+async def delete_photo(
+    session: AsyncSession,
+    photo_orm: PhotoOrm,
+) -> None:
+    """Delete a photo."""
+    await session.delete(photo_orm)
+    await session.commit()
