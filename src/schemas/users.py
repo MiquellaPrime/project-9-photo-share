@@ -9,10 +9,6 @@ class UserBaseDto(BaseModel):
     email: EmailStr
 
 
-class UserCreateDto(UserBaseDto):
-    password: str = Field(min_length=6)
-
-
 class UserDto(UserBaseDto):
     model_config = ConfigDict(from_attributes=True)
 
@@ -22,3 +18,7 @@ class UserDto(UserBaseDto):
     is_verified: bool
     created_at: datetime
     updated_at: datetime
+
+
+class UserCreateDto(UserBaseDto):
+    password: str = Field(min_length=6)

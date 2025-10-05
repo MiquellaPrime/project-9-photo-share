@@ -2,16 +2,12 @@ from pwdlib import PasswordHash
 
 
 class PasswordHashService:
-    """Class for hashing and validating passwords"""
+    """Service for hashing and verifying passwords."""
 
-    def __init__(self):
-        self._ctx = PasswordHash.recommended()
+    _password_hash = PasswordHash.recommended()
 
-    def hash_password(self, password: str) -> str:
-        return self._ctx.hash(password)
+    def hash(self, password: str) -> str:
+        return self._password_hash.hash(password=password)
 
-    def verify_password(self, password: str, hashed: str) -> bool:
-        return self._ctx.verify(password, hashed)
-
-
-pwd_context = PasswordHashService()
+    def verify(self, password: str, hashed_password: str) -> bool:
+        return self._password_hash.verify(password=password, hash=hashed_password)

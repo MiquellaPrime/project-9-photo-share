@@ -10,6 +10,7 @@ UTC_NOW_SQL = text("TIMEZONE('utc', now())")
 
 str_255 = Annotated[str, 255]
 
+int_pk = Annotated[int, mapped_column(primary_key=True)]
 timestamp_tz = Annotated[
     datetime,
     mapped_column(server_default=UTC_NOW_SQL),
