@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Annotated
+from uuid import UUID, uuid4
 
 from sqlalchemy import TIMESTAMP, MetaData, String, text
 from sqlalchemy.orm import DeclarativeBase, mapped_column
@@ -11,12 +12,10 @@ UTC_NOW_SQL = text("TIMEZONE('utc', now())")
 str_255 = Annotated[str, 255]
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
-timestamp_tz = Annotated[
-    datetime,
-    mapped_column(server_default=UTC_NOW_SQL),
-]
+uuid_pk = Annotated[UUID, mapped_column(primary_key=True, default=uuid4)]
 bool_t = Annotated[bool, mapped_column(server_default=text("TRUE"))]
 bool_f = Annotated[bool, mapped_column(server_default=text("FALSE"))]
+timestamp_tz = Annotated[datetime, mapped_column(server_default=UTC_NOW_SQL)]
 
 
 class Base(DeclarativeBase):
