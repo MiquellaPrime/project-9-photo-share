@@ -25,7 +25,7 @@ router = APIRouter(prefix="/photos", tags=["photos"])
 async def photo_by_uuid(
     session: db_dependency,
     user: user_dependency,
-    photo_uuid: Annotated[UUID, Path],
+    photo_uuid: Annotated[UUID, Path()],
 ) -> PhotoOrm:
     """Dependency resolver: returns PhotoOrm by path UUID or raises 404."""
     photo = await photos_crud.get_photo_by_uuid(
