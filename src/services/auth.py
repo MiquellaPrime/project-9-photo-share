@@ -5,9 +5,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.constants import ACCESS_TOKEN_TYPE
 from src.core import db_helper
 from src.core.models import UserOrm
 from src.repository import users_crud
+from src.schemas import UserRoles
 
 from .security import PasswordHashService
 from .token import TokenService
@@ -16,6 +18,31 @@ from .token import TokenService
 db_dependency = Annotated[AsyncSession, Depends(db_helper.session_getter)]
 creds_dependency = Annotated[HTTPAuthorizationCredentials, Depends(HTTPBearer())]
 token_service_dependency = Annotated[TokenService, Depends(TokenService)]
+
+
+async def authenticate_user(
+    session: db_dependency,
+    email: Annotated[EmailStr, Form()],
+    password: Annotated[str, Form(min_length=6)],
+) -> UserOrm:
+    """Validate email and password, returning the user or raising 401/403."""
+    unauthed_exc = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid email or password",
+    )
+    if not (user := await users_crud.get_user_by_email(session, str(email))):
+        raise unauthed_exc
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user",
+        )
+
+    if not PasswordHashService().verify(password, user.hashed_password):
+        raise unauthed_exc
+
+    return user
 
 
 def get_current_user(from_token_type: str):
@@ -46,26 +73,21 @@ def get_current_user(from_token_type: str):
     return dependency
 
 
-async def authenticate_user(
-    session: db_dependency,
-    email: Annotated[EmailStr, Form()],
-    password: Annotated[str, Form(min_length=6)],
-) -> UserOrm:
-    """Validate email and password, returning the user or raising 401/403."""
-    unauthed_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid email or password",
-    )
-    if not (user := await users_crud.get_user_by_email(session, str(email))):
-        raise unauthed_exc
+def user_with_role(roles: set[UserRoles]):
+    """Return a dependency that checks role of current user."""
 
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user",
-        )
+    async def dependency(
+        user: Annotated[
+            UserOrm,
+            Depends(get_current_user(from_token_type=ACCESS_TOKEN_TYPE)),
+        ],
+    ) -> UserOrm:
+        """Checks whether a user role belongs to the `roles` set."""
+        if user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not enough permissions",
+            )
+        return user
 
-    if not PasswordHashService().verify(password, user.hashed_password):
-        raise unauthed_exc
-
-    return user
+    return dependency
