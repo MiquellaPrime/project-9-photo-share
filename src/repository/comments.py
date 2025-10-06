@@ -63,10 +63,13 @@ async def get_comments(
 async def get_comment_by_uuid(
     session: AsyncSession,
     comment_uuid: UUID,
-    user_id: int,
+    user_id: int | None = None,
 ) -> CommentOrm | None:
     """Fetch a comment by UUID."""
-    stmt = select(CommentOrm).filter_by(uuid=comment_uuid, user_id=user_id)
+    stmt = select(CommentOrm).filter_by(uuid=comment_uuid)
+
+    if user_id is not None:
+        stmt = stmt.filter_by(user_id=user_id)
 
     result = await session.execute(stmt)
     return result.scalars().first()
