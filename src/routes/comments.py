@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 
-from src.core.models import PhotoOrm, CommentOrm
+from src.core.models import CommentOrm, PhotoOrm
 from src.dependencies import db_dependency, limit_param, offset_param, user_dependency
 from src.repository import comments_crud, photos_crud
 from src.schemas import CommentCreateDto, CommentDto, CommentUpdateDto
@@ -92,7 +92,7 @@ async def get_comments_by_photo(
 
 
 @router.get("/comments", response_model=list[CommentDto])
-async def get_user_comments(
+async def get_comments(
     session: db_dependency,
     user: user_dependency,
     offset: offset_param = 0,
