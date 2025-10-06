@@ -86,3 +86,12 @@ async def update_comment(
     await session.commit()
     await session.refresh(comment_orm)
     return comment_orm
+
+
+async def delete_comment(
+    session: AsyncSession,
+    comment_orm: CommentOrm,
+) -> None:
+    """Delete an existing comment."""
+    await session.delete(comment_orm)
+    await session.commit()
