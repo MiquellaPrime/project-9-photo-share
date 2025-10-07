@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -21,4 +20,3 @@ class TagsDto(BaseModel):
 
     uuid: UUID
     name: str
-    created_at: datetime
