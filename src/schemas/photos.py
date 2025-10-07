@@ -10,6 +10,12 @@ class BaseModelWithConfig(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PhotoTransformedDto(BaseModelWithConfig):
+    uuid: UUID
+    transformed_url: str
+    created_at: datetime
+
+
 class PhotoBaseDto(BaseModelWithConfig):
     uuid: UUID
     owner_id: int
@@ -26,6 +32,7 @@ class PhotoDto(PhotoBaseDto):
     updated_at: datetime
 
     tags: list[TagsDto]
+    transformations: list[PhotoTransformedDto]
 
 
 class PhotoUpdateDto(BaseModel):
