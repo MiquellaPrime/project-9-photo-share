@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from fastapi import (
     APIRouter,
     Depends,
+    File,
     Form,
     HTTPException,
     Path,
@@ -16,7 +17,14 @@ from src.core import cloudinary_cli
 from src.core.models import PhotoOrm
 from src.dependencies import db_dependency, limit_param, offset_param, user_dependency
 from src.repository import photos_crud
-from src.schemas import PhotoCreateDto, PhotoDto, PhotoUpdateDto, TagsParam
+from src.schemas import (
+    PhotoCreateDto,
+    PhotoDto,
+    PhotoTransformedDto,
+    PhotoUpdateDto,
+    TagsParam,
+    TransformRequest,
+)
 from src.services import photos_service
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -52,7 +60,7 @@ photo_orm_dependency = Annotated[PhotoOrm, Depends(photo_by_uuid)]
 async def upload_photo(
     session: db_dependency,
     user: user_dependency,
-    file: UploadFile,
+    file: Annotated[UploadFile, File()],
     tags: Annotated[TagsParam, Query()],
     description: Annotated[str | None, Form(min_length=1, max_length=255)] = None,
 ):
@@ -73,6 +81,28 @@ async def upload_photo(
         photo_create=photo_create,
         tags_param=tags,
     )
+
+
+@router.post(
+    "/{photo_uuid}/transform",
+    response_model=PhotoTransformedDto,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_photo_transformation(
+    session: db_dependency,
+    photo_orm: photo_orm_dependency,
+    transformations: TransformRequest,
+):
+    transformed_url = cloudinary_cli.transform_image(
+        photo_uuid=photo_orm.uuid,
+        transformations=transformations,
+    )
+    transformed = await photos_crud.create_transformed_photo(
+        session=session,
+        photo_orm=photo_orm,
+        transformed_url=transformed_url,
+    )
+    return transformed
 
 
 @router.get("", response_model=list[PhotoDto])

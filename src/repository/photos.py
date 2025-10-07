@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.core.models import PhotoOrm, TagOrm
+from src.core.models import PhotoOrm, PhotoTransformedOrm, TagOrm
 from src.schemas import PhotoCreateDto, PhotoUpdateDto
 
 
@@ -39,7 +39,10 @@ async def get_photos(
         .order_by(PhotoOrm.created_at.desc())
         .offset(offset)
         .limit(limit)
-        .options(selectinload(PhotoOrm.tags))
+        .options(
+            selectinload(PhotoOrm.tags),
+            selectinload(PhotoOrm.transformations),
+        )
     )
     result = await session.execute(stmt)
     return list(result.scalars().all())
@@ -55,7 +58,10 @@ async def get_photo_by_uuid(
     if owner_id:
         stmt = stmt.filter_by(owner_id=owner_id)
 
-    stmt = stmt.options(selectinload(PhotoOrm.tags))
+    stmt = stmt.options(
+        selectinload(PhotoOrm.tags),
+        selectinload(PhotoOrm.transformations),
+    )
 
     result = await session.execute(stmt)
     return result.scalars().first()
@@ -81,3 +87,18 @@ async def delete_photo(
     """Delete a photo."""
     await session.delete(photo_orm)
     await session.commit()
+
+
+async def create_transformed_photo(
+    session: AsyncSession,
+    photo_orm: PhotoOrm,
+    transformed_url: str,
+) -> PhotoTransformedOrm:
+    """Create and persist a transformed photo."""
+    transformed = PhotoTransformedOrm(
+        transformed_url=transformed_url,
+        photo=photo_orm,
+    )
+    session.add(transformed)
+    await session.commit()
+    return transformed

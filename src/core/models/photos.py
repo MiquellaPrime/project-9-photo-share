@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,6 +26,10 @@ class PhotoOrm(TimestampMixin, Base):
         secondary="photo_tags",
         order_by="TagOrm.name",
     )
+    transformations: Mapped[list["PhotoTransformedOrm"]] = relationship(
+        back_populates="photo",
+        order_by="PhotoTransformedOrm.created_at.desc()",
+    )
     user: Mapped["UserOrm"] = relationship(back_populates="photos")
 
 
@@ -50,3 +55,16 @@ class PhotoTagM2M(Base):
     tag_uuid: Mapped[uuid_pk] = mapped_column(
         ForeignKey("tags.uuid", ondelete="CASCADE"),
     )
+
+
+class PhotoTransformedOrm(Base):
+    __tablename__ = "photo_transformed"
+
+    uuid: Mapped[uuid_pk]
+    original_uuid: Mapped[UUID] = mapped_column(
+        ForeignKey("photos.uuid", ondelete="CASCADE"),
+    )
+    transformed_url: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[timestamp_tz]
+
+    photo: Mapped[PhotoOrm] = relationship(back_populates="transformations")

@@ -1,4 +1,5 @@
 __all__ = (
+    "TransformRequest",
     "UploadImageResult",
     "CommentCreateDto",
     "CommentDto",
@@ -7,6 +8,7 @@ __all__ = (
     "HealthResponse",
     "PhotoCreateDto",
     "PhotoDto",
+    "PhotoTransformedDto",
     "PhotoUpdateDto",
     "TagsDto",
     "TagsParam",
@@ -16,11 +18,16 @@ __all__ = (
     "UserDto",
 )
 
-from .cloudinary import UploadImageResult
+from .cloudinary import TransformRequest, UploadImageResult
 from .comments import CommentCreateDto, CommentDto, CommentUpdateDto
 from .enums import UserRoles
 from .meta import HealthResponse
-from .photos import PhotoCreateDto, PhotoDto, PhotoUpdateDto
+from .photos import (
+    PhotoCreateDto,
+    PhotoDto,
+    PhotoTransformedDto,
+    PhotoUpdateDto,
+)
 from .tags import TagsDto, TagsParam
 from .token import TokenData, TokenInfo
 from .users import UserCreateDto, UserDto
