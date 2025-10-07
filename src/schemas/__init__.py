@@ -1,4 +1,5 @@
 __all__ = (
+    "TransformRequest",
     "UploadImageResult",
     "CommentCreateDto",
     "CommentDto",
@@ -17,7 +18,7 @@ __all__ = (
     "UserDto",
 )
 
-from .cloudinary import UploadImageResult
+from .cloudinary import TransformRequest, UploadImageResult
 from .comments import CommentCreateDto, CommentDto, CommentUpdateDto
 from .enums import UserRoles
 from .meta import HealthResponse
