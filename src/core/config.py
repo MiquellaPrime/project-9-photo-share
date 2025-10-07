@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -61,6 +61,13 @@ class JwtConfig(BaseModel):
     refresh_token_expire_days: int = 7
 
 
+class FirstAdminConfig(BaseModel):
+    """First admin configuration."""
+
+    email: EmailStr
+    password: str
+
+
 class Settings(BaseSettings):
     """Main application settings container."""
 
@@ -73,6 +80,7 @@ class Settings(BaseSettings):
     db: DatabaseConfig
     cloudinary: CloudinaryConfig
     jwt: JwtConfig
+    first_admin: FirstAdminConfig
 
 
 settings = Settings()
