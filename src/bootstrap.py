@@ -2,11 +2,11 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core import settings, db_helper
+from src.core import db_helper, settings
 from src.core.models import UserOrm
 from src.repository import users_crud
-from src.services import PasswordHashService
 from src.schemas import UserRoles
+from src.services import PasswordHashService
 
 
 async def create_first_admin(session: AsyncSession) -> None:
