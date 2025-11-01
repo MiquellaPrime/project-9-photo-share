@@ -2,6 +2,14 @@ from pydantic import BaseModel, EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class ServerConfig(BaseModel):
+    """Uvicorn server configuration."""
+
+    host: str = "0.0.0.0"
+    port: int = 8000
+    reload: bool = True
+
+
 class PostgresConfig(BaseModel):
     """PostgreSQL connection configuration."""
 
@@ -77,6 +85,7 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
         extra="ignore",
     )
+    server: ServerConfig = ServerConfig()
     db: DatabaseConfig
     cloudinary: CloudinaryConfig
     jwt: JwtConfig

@@ -1,6 +1,8 @@
+import uvicorn
 from fastapi import status
 from fastapi.responses import JSONResponse, RedirectResponse
 
+from src.core import settings
 from src.create_app import create_app
 from src.routes import router as main_router
 from src.schemas import HealthResponse
@@ -23,4 +25,13 @@ async def check_health():
         content={"status": "ok"},
         status_code=status.HTTP_200_OK,
         headers={"Cache-Control": "no-cache"},
+    )
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        app="src.main:app",
+        host=settings.server.host,
+        port=settings.server.port,
+        reload=settings.server.reload,
     )
